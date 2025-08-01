@@ -1,0 +1,40 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    padding: 20px;
+    color: #333;
+}
+
+.hidden {
+    display: none;
+}
+
+input, select, button {
+    display: block;
+    margin: 10px 0;
+    padding: 8px;
+    width: 300px;
+}
+
+button {
+    background-color: #3b7ddd;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+h2, h3 {
+    margin-top: 30px;
+}
+
+.form-section {
+    margin-top: 20px;
+}
+
+.item-list {
+    margin: 10px 0 30px;
+}
+
+.item {
+    margin: 5px 0;
+}
