@@ -1,84 +1,86 @@
-// Wait for Firebase Auth to initialize
-firebase.auth().onAuthStateChanged(user => {
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+import { firebaseConfig } from "./firebaseConfig.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const signupBtn = document.getElementById("signup");
+const loginBtn = document.getElementById("login");
+const logoutBtn = document.getElementById("logout");
+
+signupBtn.onclick = () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  createUserWithEmailAndPassword(auth, email, password).catch(console.error);
+};
+
+loginBtn.onclick = () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  signInWithEmailAndPassword(auth, email, password).catch(console.error);
+};
+
+logoutBtn.onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, async (user) => {
+  const authSection = document.getElementById("auth-section");
+  const appSection = document.getElementById("app");
   if (user) {
-    document.getElementById('auth').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    setupRealTimeListeners(user.uid);
+    document.getElementById("user-email").innerText = user.email;
+    authSection.style.display = "none";
+    appSection.style.display = "block";
+    logoutBtn.style.display = "inline-block";
+    await loadAllData(user.uid);
   } else {
-    document.getElementById('auth').style.display = 'block';
-    document.getElementById('app').style.display = 'none';
+    authSection.style.display = "block";
+    appSection.style.display = "none";
+    logoutBtn.style.display = "none";
   }
 });
 
-// Sign up
-document.getElementById('signup').addEventListener('click', () => {
-  const email = document.getElementById('signup-email').value;
-  const password = document.getElementById('signup-password').value;
-  firebase.auth().createUserWithEmailAndPassword(email, password)
-    .catch(error => alert(error.message));
-});
+window.addItem = async (category) => {
+  const user = auth.currentUser;
+  if (!user) return;
 
-// Login
-document.getElementById('login').addEventListener('click', () => {
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
-  firebase.auth().signInWithEmailAndPassword(email, password)
-    .catch(error => alert(error.message));
-});
+  const input = document.getElementById(`new-${category}`);
+  const value = input.value.trim();
+  if (!value) return;
 
-// Logout
-document.getElementById('logout').addEventListener('click', () => {
-  firebase.auth().signOut();
-});
+  const docRef = doc(db, category, user.uid);
+  const docSnap = await getDoc(docRef);
+  let data = docSnap.exists() ? docSnap.data().items : [];
 
-// Add item
-document.getElementById('add').addEventListener('click', () => {
-  const type = document.getElementById('type').value;
-  const name = document.getElementById('name').value;
-  const uid = firebase.auth().currentUser.uid;
+  data.push(value);
 
-  firebase.firestore().collection('users').doc(uid)
-    .collection(type).add({ name })
-    .then(() => {
-      document.getElementById('name').value = '';
-    });
-});
+  await setDoc(docRef, { items: data });
+  input.value = "";
+  loadItems(category, data);
+};
 
-// Search
-document.getElementById('search').addEventListener('click', () => {
-  const type = document.getElementById('type').value;
-  const query = document.getElementById('search-term').value.toLowerCase();
-  const uid = firebase.auth().currentUser.uid;
-  const ul = document.getElementById(`list-${type}`);
-  ul.innerHTML = '';
+async function loadAllData(uid) {
+  await loadCategory("games", uid);
+  await loadCategory("movies", uid);
+  await loadCategory("books", uid);
+  await loadCategory("comics", uid);
+}
 
-  firebase.firestore().collection('users').doc(uid)
-    .collection(type).orderBy('name').get()
-    .then(snapshot => {
-      snapshot.forEach(doc => {
-        if (doc.data().name.toLowerCase().includes(query)) {
-          const li = document.createElement('li');
-          li.textContent = doc.data().name;
-          ul.appendChild(li);
-        }
-      });
-    });
-});
+async function loadCategory(category, uid) {
+  const docRef = doc(db, category, uid);
+  const docSnap = await getDoc(docRef);
+  const data = docSnap.exists() ? docSnap.data().items : [];
+  loadItems(category, data);
+}
 
-// Real-time listeners setup
-function setupRealTimeListeners(uid) {
-  ['games', 'books', 'movies', 'comics'].forEach(type => {
-    const ul = document.getElementById(`list-${type}`);
-
-    firebase.firestore().collection('users').doc(uid)
-      .collection(type).orderBy('name')
-      .onSnapshot(snapshot => {
-        ul.innerHTML = '';
-        snapshot.forEach(doc => {
-          const li = document.createElement('li');
-          li.textContent = doc.data().name;
-          ul.appendChild(li);
-        });
-      });
+function loadItems(category, items) {
+  const list = document.getElementById(`${category}-list`);
+  list.innerHTML = "";
+  items.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    list.appendChild(li);
   });
 }
