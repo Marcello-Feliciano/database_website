@@ -47,6 +47,10 @@ window.addItem = async (category) => {
   if (!user) return;
 
   const input = document.getElementById(`new-${category}`);
+  if (!input) {
+    console.error(`Input element #new-${category} not found`);
+    return;
+  }
   const value = input.value.trim();
   if (!value) return;
 
@@ -84,3 +88,4 @@ function loadItems(category, items) {
     list.appendChild(li);
   });
 }
+
