@@ -1,106 +1,84 @@
-let currentUser = null;
-
-function saveUsers(users) {
-  localStorage.setItem("users", JSON.stringify(users));
-}
-
-function getUsers() {
-  return JSON.parse(localStorage.getItem("users")) || {};
-}
-
-function login() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value;
-
-  const users = getUsers();
-  if (users[username] && users[username].password === password) {
-    currentUser = username;
-    showApp();
+// Wait for Firebase Auth to initialize
+firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById('auth').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    setupRealTimeListeners(user.uid);
   } else {
-    document.getElementById("auth-msg").innerText = "Invalid login.";
+    document.getElementById('auth').style.display = 'block';
+    document.getElementById('app').style.display = 'none';
   }
-}
+});
 
-function register() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value;
+// Sign up
+document.getElementById('signup').addEventListener('click', () => {
+  const email = document.getElementById('signup-email').value;
+  const password = document.getElementById('signup-password').value;
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .catch(error => alert(error.message));
+});
 
-  const users = getUsers();
-  if (users[username]) {
-    document.getElementById("auth-msg").innerText = "User already exists.";
-    return;
-  }
+// Login
+document.getElementById('login').addEventListener('click', () => {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .catch(error => alert(error.message));
+});
 
-  users[username] = { password, data: { games: [], movies: [], books: [], comics: [] } };
-  saveUsers(users);
-  document.getElementById("auth-msg").innerText = "User registered! You can log in now.";
-}
+// Logout
+document.getElementById('logout').addEventListener('click', () => {
+  firebase.auth().signOut();
+});
 
-function logout() {
-  currentUser = null;
-  document.getElementById("app").classList.add("hidden");
-  document.getElementById("auth").classList.remove("hidden");
-}
+// Add item
+document.getElementById('add').addEventListener('click', () => {
+  const type = document.getElementById('type').value;
+  const name = document.getElementById('name').value;
+  const uid = firebase.auth().currentUser.uid;
 
-function getUserData() {
-  return getUsers()[currentUser].data;
-}
-
-function setUserData(data) {
-  const users = getUsers();
-  users[currentUser].data = data;
-  saveUsers(users);
-}
-
-function showApp() {
-  document.getElementById("auth").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
-  document.getElementById("currentUser").innerText = currentUser;
-  renderAll();
-}
-
-function saveItem() {
-  const type = document.getElementById("mediaType").value;
-  const title = document.getElementById("title").value.trim();
-  const description = document.getElementById("description").value.trim();
-  if (!title) return;
-
-  const data = getUserData();
-  data[type].push({ title, description });
-  setUserData(data);
-  renderAll();
-  document.getElementById("title").value = "";
-  document.getElementById("description").value = "";
-}
-
-function renderAll(filter = "") {
-  const data = getUserData();
-  const container = document.getElementById("sections");
-  container.innerHTML = "";
-
-  for (let type in data) {
-    const items = data[type].filter(item =>
-      item.title.toLowerCase().includes(filter.toLowerCase()) ||
-      item.description.toLowerCase().includes(filter.toLowerCase())
-    );
-    const section = document.createElement("div");
-    section.innerHTML = `<h3>${type.charAt(0).toUpperCase() + type.slice(1)}</h3>`;
-
-    const list = document.createElement("div");
-    list.className = "item-list";
-    items.forEach(item => {
-      const div = document.createElement("div");
-      div.className = "item";
-      div.innerHTML = `<strong>${item.title}</strong>: ${item.description}`;
-      list.appendChild(div);
+  firebase.firestore().collection('users').doc(uid)
+    .collection(type).add({ name })
+    .then(() => {
+      document.getElementById('name').value = '';
     });
+});
 
-    section.appendChild(list);
-    container.appendChild(section);
-  }
-}
+// Search
+document.getElementById('search').addEventListener('click', () => {
+  const type = document.getElementById('type').value;
+  const query = document.getElementById('search-term').value.toLowerCase();
+  const uid = firebase.auth().currentUser.uid;
+  const ul = document.getElementById(`list-${type}`);
+  ul.innerHTML = '';
 
-function searchItems() {
-  const query = document.getElementById("search").value;
-  renderAll(query);
+  firebase.firestore().collection('users').doc(uid)
+    .collection(type).orderBy('name').get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        if (doc.data().name.toLowerCase().includes(query)) {
+          const li = document.createElement('li');
+          li.textContent = doc.data().name;
+          ul.appendChild(li);
+        }
+      });
+    });
+});
+
+// Real-time listeners setup
+function setupRealTimeListeners(uid) {
+  ['games', 'books', 'movies', 'comics'].forEach(type => {
+    const ul = document.getElementById(`list-${type}`);
+
+    firebase.firestore().collection('users').doc(uid)
+      .collection(type).orderBy('name')
+      .onSnapshot(snapshot => {
+        ul.innerHTML = '';
+        snapshot.forEach(doc => {
+          const li = document.createElement('li');
+          li.textContent = doc.data().name;
+          ul.appendChild(li);
+        });
+      });
+  });
 }
