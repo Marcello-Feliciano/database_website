@@ -3,49 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Media Manager</title>
+  <title>My Media Library</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Firebase App (the core Firebase SDK) -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
-<!-- Your Firebase config -->
-<script src="firebaseConfig.js"></script>
-
+  <script type="module" src="app.js" defer></script>
 </head>
 <body>
-  <div id="auth">
-    <h2>Login or Register</h2>
-    <input type="text" id="username" placeholder="Username" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
-    <button onclick="register()">Register</button>
-    <p id="auth-msg"></p>
+  <h1>My Media Library</h1>
+
+  <div id="auth-section">
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button id="signup">Sign Up</button>
+    <button id="login">Log In</button>
+    <button id="logout" style="display:none;">Log Out</button>
   </div>
 
-  <div id="app" class="hidden">
-    <h2>Welcome, <span id="currentUser"></span> <button onclick="logout()">[Logout]</button></h2>
-    
-    <input id="search" placeholder="Search..." oninput="searchItems()" />
-    
-    <div id="sections"></div>
+  <div id="app" style="display:none;">
+    <h2>Welcome, <span id="user-email"></span></h2>
 
-    <div class="form-section">
-      <h3>Add/Edit Item</h3>
-      <select id="mediaType">
-        <option>games</option>
-        <option>movies</option>
-        <option>books</option>
-        <option>comics</option>
-      </select>
-      <input id="title" placeholder="Title" />
-      <input id="description" placeholder="Description" />
-      <button onclick="saveItem()">Save</button>
+    <div class="media-section" id="games-section">
+      <h3>Games</h3>
+      <input type="text" id="new-game" placeholder="Add new game">
+      <button onclick="addItem('games')">Add</button>
+      <ul id="games-list"></ul>
+    </div>
+
+    <div class="media-section" id="movies-section">
+      <h3>Movies</h3>
+      <input type="text" id="new-movie" placeholder="Add new movie">
+      <button onclick="addItem('movies')">Add</button>
+      <ul id="movies-list"></ul>
+    </div>
+
+    <div class="media-section" id="books-section">
+      <h3>Books</h3>
+      <input type="text" id="new-book" placeholder="Add new book">
+      <button onclick="addItem('books')">Add</button>
+      <ul id="books-list"></ul>
+    </div>
+
+    <div class="media-section" id="comics-section">
+      <h3>Comics</h3>
+      <input type="text" id="new-comic" placeholder="Add new comic">
+      <button onclick="addItem('comics')">Add</button>
+      <ul id="comics-list"></ul>
     </div>
   </div>
-
-  <script src="script.js"></script>
 </body>
 </html>
-
