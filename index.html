@@ -10,93 +10,51 @@
 <body>
   <h1>My Media Library</h1>
 
-  <div id="auth-section">
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
+  <!-- Login / Signup Screen -->
+  <div id="login-screen">
+    <h2>Welcome</h2>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <br>
     <button id="signup">Sign Up</button>
     <button id="login">Log In</button>
-    <button id="logout" style="display:none;">Log Out</button>
   </div>
 
-  <div id="app" style="display:none;">
-    <h2>Welcome, <span id="user-email"></span></h2>
+  <!-- App Screen -->
+  <div id="app-screen" style="display:none;">
+    <header>
+      <h2>Hello, <span id="user-email"></span>!</h2>
+      <button id="logout">Logout</button>
+    </header>
 
-    <div class="media-section" id="games-section">
+    <!-- Categories -->
+    <section>
       <h3>Games</h3>
-      <input type="text" id="new-games" placeholder="Add new game">
+      <input id="new-games" placeholder="Add new game" />
       <button onclick="addItem('games')">Add</button>
       <ul id="games-list"></ul>
-    </div>
+    </section>
 
-    <div class="media-section" id="movies-section">
+    <section>
       <h3>Movies</h3>
-      <input type="text" id="new-movies" placeholder="Add new movie">
+      <input id="new-movies" placeholder="Add new movie" />
       <button onclick="addItem('movies')">Add</button>
       <ul id="movies-list"></ul>
-    </div>
+    </section>
 
-    <div class="media-section" id="books-section">
+    <section>
       <h3>Books</h3>
-      <input type="text" id="new-books" placeholder="Add new book">
+      <input id="new-books" placeholder="Add new book" />
       <button onclick="addItem('books')">Add</button>
       <ul id="books-list"></ul>
-    </div>
+    </section>
 
-    <div class="media-section" id="comics-section">
+    <section>
       <h3>Comics</h3>
-      <input type="text" id="new-comics" placeholder="Add new comic">
+      <input id="new-comics" placeholder="Add new comic" />
       <button onclick="addItem('comics')">Add</button>
       <ul id="comics-list"></ul>
-    </div>
-    <!-- Auth Section -->
-<div id="auth-section">
-  <h2>Welcome</h2>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <br>
-  <button id="signup">Sign Up</button>
-  <button id="login">Log In</button>
-</div>
-
-<!-- App Section -->
-<div id="app" style="display:none;">
-  <h2>Hello, <span id="user-email"></span>!</h2>
-  <button id="logout">Logout</button>
-
-  <!-- Categories -->
-  <div>
-    <h3>Games</h3>
-    <input id="new-games" placeholder="Add game">
-    <button onclick="addItem('games')">Add</button>
-    <ul id="games-list"></ul>
-  </div>
-
-  <div>
-    <h3>Movies</h3>
-    <input id="new-movies" placeholder="Add movie">
-    <button onclick="addItem('movies')">Add</button>
-    <ul id="movies-list"></ul>
-  </div>
-
-  <div>
-    <h3>Books</h3>
-    <input id="new-books" placeholder="Add book">
-    <button onclick="addItem('books')">Add</button>
-    <ul id="books-list"></ul>
-  </div>
-
-  <div>
-    <h3>Comics</h3>
-    <input id="new-comics" placeholder="Add comic">
-    <button onclick="addItem('comics')">Add</button>
-    <ul id="comics-list"></ul>
-  </div>
-</div>
-
+    </section>
   </div>
 </body>
 </html>
-
-
-
-
