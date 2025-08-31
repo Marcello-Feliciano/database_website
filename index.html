@@ -48,9 +48,55 @@
       <button onclick="addItem('comics')">Add</button>
       <ul id="comics-list"></ul>
     </div>
+    <!-- Auth Section -->
+<div id="auth-section">
+  <h2>Welcome</h2>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <br>
+  <button id="signup">Sign Up</button>
+  <button id="login">Log In</button>
+</div>
+
+<!-- App Section -->
+<div id="app" style="display:none;">
+  <h2>Hello, <span id="user-email"></span>!</h2>
+  <button id="logout">Logout</button>
+
+  <!-- Categories -->
+  <div>
+    <h3>Games</h3>
+    <input id="new-games" placeholder="Add game">
+    <button onclick="addItem('games')">Add</button>
+    <ul id="games-list"></ul>
+  </div>
+
+  <div>
+    <h3>Movies</h3>
+    <input id="new-movies" placeholder="Add movie">
+    <button onclick="addItem('movies')">Add</button>
+    <ul id="movies-list"></ul>
+  </div>
+
+  <div>
+    <h3>Books</h3>
+    <input id="new-books" placeholder="Add book">
+    <button onclick="addItem('books')">Add</button>
+    <ul id="books-list"></ul>
+  </div>
+
+  <div>
+    <h3>Comics</h3>
+    <input id="new-comics" placeholder="Add comic">
+    <button onclick="addItem('comics')">Add</button>
+    <ul id="comics-list"></ul>
+  </div>
+</div>
+
   </div>
 </body>
 </html>
+
 
 
 
