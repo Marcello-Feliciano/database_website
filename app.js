@@ -27,18 +27,20 @@ loginBtn.onclick = () => {
 logoutBtn.onclick = () => signOut(auth);
 
 onAuthStateChanged(auth, async (user) => {
-  const authSection = document.getElementById("auth-section");
-  const appSection = document.getElementById("app");
+  const loginScreen = document.getElementById("login-screen");
+  const appScreen = document.getElementById("app-screen");
+
   if (user) {
     document.getElementById("user-email").innerText = user.email;
-    authSection.style.display = "none";
-    appSection.style.display = "block";
+    loginScreen.style.display = "none";
+    appScreen.style.display = "block";
     await loadAllData(user.uid);
   } else {
-    authSection.style.display = "block";
-    appSection.style.display = "none";
+    loginScreen.style.display = "block";
+    appScreen.style.display = "none";
   }
 });
+
 
 
 window.addItem = async (category) => {
@@ -87,5 +89,6 @@ function loadItems(category, items) {
     list.appendChild(li);
   });
 }
+
 
 
