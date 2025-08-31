@@ -43,6 +43,7 @@ onAuthStateChanged(auth, async (user) => {
 
 
 
+
 window.addItem = async (category) => {
   const user = auth.currentUser;
   if (!user) return;
@@ -89,6 +90,7 @@ function loadItems(category, items) {
     list.appendChild(li);
   });
 }
+
 
 
 
