@@ -8,16 +8,36 @@ h1, h2 {
   text-align: center;
 }
 
+#auth-section, #app {
+  text-align: center;
+  margin-top: 40px;
+}
+
 input {
+  padding: 8px;
   margin: 5px;
-  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
 button {
+  padding: 8px 14px;
   margin: 5px;
-  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
+  background: #4caf50;
+  color: white;
 }
+
+button:hover {
+  background: #45a049;
+}
+
+#logout {
+  background: #f44336;
+}
+
 
 .media-section {
   background: #fff;
@@ -33,5 +53,6 @@ ul {
   list-style: none;
   padding: 0;
 }
+
 
 
