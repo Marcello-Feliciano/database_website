@@ -33,14 +33,13 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("user-email").innerText = user.email;
     authSection.style.display = "none";
     appSection.style.display = "block";
-    logoutBtn.style.display = "inline-block";
     await loadAllData(user.uid);
   } else {
     authSection.style.display = "block";
     appSection.style.display = "none";
-    logoutBtn.style.display = "none";
   }
 });
+
 
 window.addItem = async (category) => {
   const user = auth.currentUser;
@@ -88,4 +87,5 @@ function loadItems(category, items) {
     list.appendChild(li);
   });
 }
+
 
