@@ -132,7 +132,10 @@ function loadItems(category, items) {
 
   items.forEach((item, index) => {
     const li = document.createElement("li");
-    li.textContent = item;
+
+    // Text span
+    const textSpan = document.createElement("span");
+    textSpan.textContent = item;
 
     // Delete button
     const delBtn = document.createElement("button");
@@ -152,6 +155,7 @@ function loadItems(category, items) {
       loadItems(category, data);
     };
 
+    li.appendChild(textSpan);
     li.appendChild(delBtn);
     list.appendChild(li);
   });
@@ -164,4 +168,5 @@ if (document.readyState === "loading") {
 } else {
   bindAuthButtons();
 }
+
 
