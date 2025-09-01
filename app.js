@@ -31,16 +31,97 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ====== HELPERS ======
-const $ = (id) => document.getElementById(id);
 const categories = ["books", "movies", "games", "comics"];
+const $ = (id) => document.getElementById(id);
 
-// ====== DOM READY ======
-document.addEventListener("DOMContentLoaded", () => {
-  // ---- Auth buttons ----
-  $("signup-btn").addEventListener("click", async () => {
-    const email = $("email").value.trim();
-    const password = $("password").value;
+// ====== CREATE UI ======
+function createUI() {
+  document.body.innerHTML = "";
+
+  // --- Login screen ---
+  const loginDiv = document.createElement("div");
+  loginDiv.id = "login-screen";
+
+  const emailInput = document.createElement("input");
+  emailInput.id = "email";
+  emailInput.type = "email";
+  emailInput.placeholder = "Email";
+  emailInput.autocomplete = "username";
+
+  const passInput = document.createElement("input");
+  passInput.id = "password";
+  passInput.type = "password";
+  passInput.placeholder = "Password";
+  passInput.autocomplete = "current-password";
+
+  const signupBtn = document.createElement("button");
+  signupBtn.id = "signup-btn";
+  signupBtn.textContent = "Sign Up";
+
+  const loginBtn = document.createElement("button");
+  loginBtn.id = "login-btn";
+  loginBtn.textContent = "Log In";
+
+  loginDiv.append(emailInput, passInput, signupBtn, loginBtn);
+  document.body.appendChild(loginDiv);
+
+  // --- App screen ---
+  const appDiv = document.createElement("div");
+  appDiv.id = "app";
+  appDiv.style.display = "none";
+
+  const userEmail = document.createElement("span");
+  userEmail.id = "user-email";
+
+  const logoutBtn = document.createElement("button");
+  logoutBtn.id = "logout-btn";
+  logoutBtn.textContent = "Logout";
+
+  appDiv.appendChild(document.createTextNode("Welcome, "));
+  appDiv.appendChild(userEmail);
+  appDiv.appendChild(document.createElement("br"));
+  appDiv.appendChild(logoutBtn);
+
+  // Search bar
+  const searchDiv = document.createElement("div");
+  searchDiv.style.margin = "15px 0";
+  const searchInput = document.createElement("input");
+  searchInput.id = "search";
+  searchInput.placeholder = "Search...";
+  searchInput.style.width = "300px";
+  searchInput.style.padding = "5px";
+  searchDiv.appendChild(searchInput);
+  appDiv.appendChild(searchDiv);
+
+  // Category sections
+  categories.forEach((category) => {
+    const section = document.createElement("div");
+    section.id = `${category}-section`;
+
+    const title = document.createElement("h3");
+    title.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+
+    const input = document.createElement("input");
+    input.id = `${category}-input`;
+    input.placeholder = `Add new ${category.slice(0, -1)}`;
+
+    const addBtn = document.createElement("button");
+    addBtn.id = `add-${category}`;
+    addBtn.textContent = "Add";
+
+    const list = document.createElement("ul");
+    list.id = `${category}-list`;
+
+    section.append(title, input, addBtn, list);
+    appDiv.appendChild(section);
+  });
+
+  document.body.appendChild(appDiv);
+
+  // --- BIND BUTTONS ---
+  signupBtn.addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+    const password = passInput.value;
     if (!email || !password) return alert("Enter email and password.");
     try {
       await createUserWithEmailAndPassword(auth, email, password);
@@ -49,9 +130,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  $("login-btn").addEventListener("click", async () => {
-    const email = $("email").value.trim();
-    const password = $("password").value;
+  loginBtn.addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+    const password = passInput.value;
     if (!email || !password) return alert("Enter email and password.");
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -60,85 +141,41 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  $("logout-btn").addEventListener("click", async () => {
+  logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
   });
 
-  // ---- Add buttons ----
+  // Add buttons
   categories.forEach((category) => {
     const btn = $(`add-${category}`);
-    if (btn) {
-      btn.addEventListener("click", async () => {
-        const input = $(`${category}-input`);
-        if (!input.value.trim()) return;
-        const user = auth.currentUser;
-        if (!user) return alert("Not logged in.");
-        await addItem(user.uid, category, input.value.trim());
-        input.value = "";
-      });
-    }
+    btn.addEventListener("click", async () => {
+      const input = $(`${category}-input`);
+      if (!input.value.trim()) return;
+      const user = auth.currentUser;
+      if (!user) return alert("Not logged in.");
+      await addItem(user.uid, category, input.value.trim());
+      input.value = "";
+    });
   });
-});
 
-// ====== AUTH STATE CHANGE ======
-onAuthStateChanged(auth, async (user) => {
-  const loginScreen = $("login-screen");
-  const appScreen = $("app");
-  if (!loginScreen || !appScreen) return;
-
-  if (user) {
-    $("user-email").innerText = user.email;
-    loginScreen.style.display = "none";
-    appScreen.style.display = "block";
-
-    // ---- Add search bar if not exists ----
-    if (!$("search")) {
-      const searchDiv = document.createElement("div");
-      searchDiv.style.margin = "15px 0";
-      const searchInput = document.createElement("input");
-      searchInput.type = "text";
-      searchInput.id = "search";
-      searchInput.placeholder = "Search...";
-      searchInput.style.padding = "5px";
-      searchInput.style.width = "100%";
-      searchInput.style.maxWidth = "300px";
-      searchDiv.appendChild(searchInput);
-      appScreen.insertBefore(searchDiv, appScreen.firstChild);
-
-      // Search functionality
-      searchInput.addEventListener("input", () => {
-        const term = searchInput.value.toLowerCase();
-        categories.forEach((category) => {
-          const list = $(`${category}-list`);
-          if (!list) return;
-          Array.from(list.children).forEach((li) => {
-            const text = li.querySelector("span").textContent.toLowerCase();
-            li.style.display = text.includes(term) ? "" : "none";
-          });
-        });
+  // Search functionality
+  searchInput.addEventListener("input", () => {
+    const term = searchInput.value.toLowerCase();
+    categories.forEach((category) => {
+      const list = $(`${category}-list`);
+      Array.from(list.children).forEach((li) => {
+        const text = li.querySelector("span").textContent.toLowerCase();
+        li.style.display = text.includes(term) ? "" : "none";
       });
-    }
-
-    // Load all categories
-    categories.forEach((cat) => loadCategory(user.uid, cat));
-  } else {
-    loginScreen.style.display = "block";
-    appScreen.style.display = "none";
-  }
-});
-
-// ====== FIRESTORE FUNCTIONS ======
-async function ensureUserDoc(uid) {
-  const userRef = doc(db, "users", uid);
-  await setDoc(userRef, {}, { merge: true }); // creates user doc if not exists
-  return userRef;
+    });
+  });
 }
 
+// ====== FIRESTORE FUNCTIONS ======
 async function loadCategory(uid, category) {
   const list = $(`${category}-list`);
   if (!list) return;
   list.innerHTML = "";
-
   try {
     const snap = await getDocs(collection(db, "users", uid, category));
     snap.forEach((docSnap) => {
@@ -151,9 +188,8 @@ async function loadCategory(uid, category) {
 }
 
 async function addItem(uid, category, name) {
-  const userRef = await ensureUserDoc(uid);
   const id = Date.now().toString();
-  await setDoc(doc(userRef, category, id), { name });
+  await setDoc(doc(db, "users", uid, category, id), { name });
   loadCategory(uid, category);
 }
 
@@ -170,7 +206,6 @@ async function updateItem(uid, category, id, newName) {
 // ====== RENDER ITEMS ======
 function renderItem(list, category, id, name, uid) {
   const li = document.createElement("li");
-
   const span = document.createElement("span");
   span.textContent = name;
 
@@ -187,8 +222,26 @@ function renderItem(list, category, id, name, uid) {
     if (confirm("Delete this item?")) deleteItem(uid, category, id);
   };
 
-  li.appendChild(span);
-  li.appendChild(editBtn);
-  li.appendChild(delBtn);
+  li.append(span, editBtn, delBtn);
   list.appendChild(li);
 }
+
+// ====== INITIALIZE ======
+createUI();
+
+onAuthStateChanged(auth, (user) => {
+  const loginScreen = $("login-screen");
+  const appScreen = $("app");
+  if (!loginScreen || !appScreen) return;
+
+  if (user) {
+    $("user-email").innerText = user.email;
+    loginScreen.style.display = "none";
+    appScreen.style.display = "block";
+    // Load all data
+    categories.forEach((cat) => loadCategory(user.uid, cat));
+  } else {
+    loginScreen.style.display = "block";
+    appScreen.style.display = "none";
+  }
+});
