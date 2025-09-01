@@ -159,7 +159,7 @@ function bindAuthButtons() {
 
 onAuthStateChanged(auth, async (user) => {
   const loginScreen = $("login-screen");
-  const appScreen = $("app-screen");
+  const appScreen = $("app-screen"); // change this to your actual app div ID, e.g., $("app")
 
   if (!loginScreen || !appScreen) {
     console.error("Screens not found. Check index.html IDs.");
@@ -170,6 +170,35 @@ onAuthStateChanged(auth, async (user) => {
     $("user-email").innerText = user.email;
     loginScreen.style.display = "none";
     appScreen.style.display = "block";
+
+    // --- Only create the search bar AFTER login ---
+    if (!document.getElementById("search")) {
+      const searchDiv = document.createElement("div");
+      searchDiv.style.margin = "15px 0";
+      const searchInput = document.createElement("input");
+      searchInput.type = "text";
+      searchInput.id = "search";
+      searchInput.placeholder = "Search...";
+      searchInput.style.padding = "5px";
+      searchInput.style.width = "100%";
+      searchInput.style.maxWidth = "300px";
+      searchDiv.appendChild(searchInput);
+      appScreen.insertBefore(searchDiv, appScreen.firstChild);
+
+      // Add search functionality
+      searchInput.addEventListener("input", () => {
+        const term = searchInput.value.toLowerCase();
+        ["books", "movies", "games", "comics"].forEach((category) => {
+          const list = $(`${category}-list`);
+          if (!list) return;
+          Array.from(list.children).forEach((li) => {
+            const text = li.querySelector("span")?.textContent.toLowerCase() || "";
+            li.style.display = text.includes(term) ? "" : "none";
+          });
+        });
+      });
+    }
+
     await loadAllData(user.uid);
   } else {
     loginScreen.style.display = "block";
@@ -544,3 +573,4 @@ if (document.readyState === "loading") {
 } else {
   bindAuthButtons();
 }
+
