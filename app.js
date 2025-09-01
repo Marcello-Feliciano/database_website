@@ -139,8 +139,25 @@ function loadItems(category, items) {
 
     // Delete button
     const delBtn = document.createElement("button");
-    delBtn.textContent = "❌";
+    delBtn.textContent = "✖";
     delBtn.style.marginLeft = "10px";
+    delBtn.style.backgroundColor = "#e74c3c"; // red
+    delBtn.style.color = "white";
+    delBtn.style.border = "none";
+    delBtn.style.borderRadius = "50%";
+    delBtn.style.width = "24px";
+    delBtn.style.height = "24px";
+    delBtn.style.cursor = "pointer";
+    delBtn.style.fontSize = "14px";
+    delBtn.style.lineHeight = "20px";
+    delBtn.style.textAlign = "center";
+    delBtn.style.padding = "0";
+    delBtn.title = "Delete item";
+    
+    // Hover effect
+    delBtn.onmouseover = () => { delBtn.style.backgroundColor = "#c0392b"; };
+    delBtn.onmouseout = () => { delBtn.style.backgroundColor = "#e74c3c"; };
+
     delBtn.onclick = async () => {
       const user = auth.currentUser;
       if (!user) return;
@@ -168,5 +185,6 @@ if (document.readyState === "loading") {
 } else {
   bindAuthButtons();
 }
+
 
 
