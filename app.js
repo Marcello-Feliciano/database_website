@@ -1,4 +1,3 @@
-// ========== Firebase Setup ==========
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
 import {
   getAuth,
@@ -9,15 +8,15 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 import {
   getFirestore,
+  collection,
   doc,
   setDoc,
   getDocs,
-  collection,
   deleteDoc,
-  updateDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-// Replace with your Firebase config
+// ====== CONFIG ======
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_APP.firebaseapp.com",
@@ -31,45 +30,54 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ========== Helpers ==========
+// ====== HELPERS ======
 const $ = (id) => document.getElementById(id);
+const categories = ["books", "movies", "games", "comics"];
 
-// ========== Authentication ==========
-$("signup-btn").addEventListener("click", async () => {
-  const email = $("email").value;
-  const password = $("password").value;
-  try {
-    await createUserWithEmailAndPassword(auth, email, password);
-  } catch (err) {
-    alert(err.message);
-  }
+// ====== DOM READY ======
+document.addEventListener("DOMContentLoaded", () => {
+  // Signup
+  $("signup-btn").addEventListener("click", async () => {
+    const email = $("email").value;
+    const password = $("password").value;
+    if (!email || !password) return alert("Enter email and password.");
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
+  // Login
+  $("login-btn").addEventListener("click", async () => {
+    const email = $("email").value;
+    const password = $("password").value;
+    if (!email || !password) return alert("Enter email and password.");
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
+  // Logout
+  $("logout-btn").addEventListener("click", async () => {
+    await signOut(auth);
+  });
 });
 
-$("login-btn").addEventListener("click", async () => {
-  const email = $("email").value;
-  const password = $("password").value;
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (err) {
-    alert(err.message);
-  }
-});
-
-$("logout-btn").addEventListener("click", async () => {
-  await signOut(auth);
-});
-
-// ========== Auth State Change ==========
+// ====== AUTH STATE ======
 onAuthStateChanged(auth, async (user) => {
   const loginScreen = $("login-screen");
-  const appScreen = $("app"); // << use your real app div id here
+  const appScreen = $("app");
+  if (!loginScreen || !appScreen) return;
 
   if (user) {
     $("user-email").innerText = user.email;
     loginScreen.style.display = "none";
     appScreen.style.display = "block";
 
-    // Insert search bar if not already created
+    // Create search bar if not present
     if (!document.getElementById("search")) {
       const searchDiv = document.createElement("div");
       searchDiv.style.margin = "15px 0";
@@ -83,35 +91,28 @@ onAuthStateChanged(auth, async (user) => {
       searchDiv.appendChild(searchInput);
       appScreen.insertBefore(searchDiv, appScreen.firstChild);
 
-      // Hook up search functionality
+      // Search functionality
       searchInput.addEventListener("input", () => {
         const term = searchInput.value.toLowerCase();
-        ["books", "movies", "games", "comics"].forEach((category) => {
+        categories.forEach((category) => {
           const list = $(`${category}-list`);
-          if (!list) return;
           Array.from(list.children).forEach((li) => {
-            const text =
-              li.querySelector("span")?.textContent.toLowerCase() || "";
+            const text = li.querySelector("span").textContent.toLowerCase();
             li.style.display = text.includes(term) ? "" : "none";
           });
         });
       });
     }
 
-    await loadAllData(user.uid);
+    // Load all data
+    categories.forEach((cat) => loadCategory(user.uid, cat));
   } else {
     loginScreen.style.display = "block";
     appScreen.style.display = "none";
   }
 });
 
-// ========== Firestore ==========
-async function loadAllData(uid) {
-  ["books", "movies", "games", "comics"].forEach((cat) =>
-    loadCategory(uid, cat)
-  );
-}
-
+// ====== FIRESTORE FUNCTIONS ======
 async function loadCategory(uid, category) {
   const list = $(`${category}-list`);
   if (!list) return;
@@ -120,7 +121,7 @@ async function loadCategory(uid, category) {
   const snap = await getDocs(collection(db, "users", uid, category));
   snap.forEach((docSnap) => {
     const data = docSnap.data();
-    renderItem(list, category, docSnap.id, data.name);
+    renderItem(list, category, docSnap.id, data.name, uid);
   });
 }
 
@@ -140,8 +141,8 @@ async function updateItem(uid, category, id, newName) {
   loadCategory(uid, category);
 }
 
-// ========== Rendering ==========
-function renderItem(list, category, id, name) {
+// ====== RENDER ITEMS ======
+function renderItem(list, category, id, name, uid) {
   const li = document.createElement("li");
 
   const span = document.createElement("span");
@@ -151,15 +152,13 @@ function renderItem(list, category, id, name) {
   editBtn.textContent = "Edit";
   editBtn.onclick = () => {
     const newName = prompt("Edit name:", name);
-    if (newName) updateItem(auth.currentUser.uid, category, id, newName);
+    if (newName && newName.trim()) updateItem(uid, category, id, newName.trim());
   };
 
   const delBtn = document.createElement("button");
   delBtn.textContent = "Delete";
   delBtn.onclick = () => {
-    if (confirm("Delete this item?")) {
-      deleteItem(auth.currentUser.uid, category, id);
-    }
+    if (confirm("Delete this item?")) deleteItem(uid, category, id);
   };
 
   li.appendChild(span);
@@ -168,15 +167,17 @@ function renderItem(list, category, id, name) {
   list.appendChild(li);
 }
 
-// ========== Add Buttons ==========
-["books", "movies", "games", "comics"].forEach((category) => {
-  const btn = $(`add-${category}`);
-  if (btn) {
-    btn.addEventListener("click", async () => {
-      const input = $(`${category}-input`);
-      if (!input.value.trim()) return;
-      await addItem(auth.currentUser.uid, category, input.value.trim());
-      input.value = "";
-    });
-  }
+// ====== ADD BUTTONS ======
+document.addEventListener("DOMContentLoaded", () => {
+  categories.forEach((category) => {
+    const btn = $(`add-${category}`);
+    if (btn) {
+      btn.addEventListener("click", async () => {
+        const input = $(`${category}-input`);
+        if (!input.value.trim()) return;
+        await addItem(auth.currentUser.uid, category, input.value.trim());
+        input.value = "";
+      });
+    }
+  });
 });
