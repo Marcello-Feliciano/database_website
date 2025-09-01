@@ -13,7 +13,7 @@ import {
   setDoc,
   getDocs,
   deleteDoc,
-  updateDoc
+  updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
 // ====== CONFIG ======
@@ -24,7 +24,7 @@ const firebaseConfig = {
   storageBucket: "gmbcreviews.firebasestorage.app",
   messagingSenderId: "156411101412",
   appId: "1:156411101412:web:dfea6aa2c4b3518a042cf1",
-  measurementId: "G-DH9W04ZEWL"
+  measurementId: "G-DH9W04ZEWL",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -37,9 +37,9 @@ const categories = ["books", "movies", "games", "comics"];
 
 // ====== DOM READY ======
 document.addEventListener("DOMContentLoaded", () => {
-  // Signup
+  // ---- Auth buttons ----
   $("signup-btn").addEventListener("click", async () => {
-    const email = $("email").value;
+    const email = $("email").value.trim();
     const password = $("password").value;
     if (!email || !password) return alert("Enter email and password.");
     try {
@@ -49,9 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Login
   $("login-btn").addEventListener("click", async () => {
-    const email = $("email").value;
+    const email = $("email").value.trim();
     const password = $("password").value;
     if (!email || !password) return alert("Enter email and password.");
     try {
@@ -61,13 +60,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Logout
   $("logout-btn").addEventListener("click", async () => {
     await signOut(auth);
   });
+
+  // ---- Add buttons ----
+  categories.forEach((category) => {
+    const btn = $(`add-${category}`);
+    if (btn) {
+      btn.addEventListener("click", async () => {
+        const input = $(`${category}-input`);
+        if (!input.value.trim()) return;
+        const user = auth.currentUser;
+        if (!user) return alert("Not logged in.");
+        await addItem(user.uid, category, input.value.trim());
+        input.value = "";
+      });
+    }
+  });
 });
 
-// ====== AUTH STATE ======
+// ====== AUTH STATE CHANGE ======
 onAuthStateChanged(auth, async (user) => {
   const loginScreen = $("login-screen");
   const appScreen = $("app");
@@ -78,8 +91,8 @@ onAuthStateChanged(auth, async (user) => {
     loginScreen.style.display = "none";
     appScreen.style.display = "block";
 
-    // Create search bar if not present
-    if (!document.getElementById("search")) {
+    // ---- Add search bar if not exists ----
+    if (!$("search")) {
       const searchDiv = document.createElement("div");
       searchDiv.style.margin = "15px 0";
       const searchInput = document.createElement("input");
@@ -97,6 +110,7 @@ onAuthStateChanged(auth, async (user) => {
         const term = searchInput.value.toLowerCase();
         categories.forEach((category) => {
           const list = $(`${category}-list`);
+          if (!list) return;
           Array.from(list.children).forEach((li) => {
             const text = li.querySelector("span").textContent.toLowerCase();
             li.style.display = text.includes(term) ? "" : "none";
@@ -105,7 +119,7 @@ onAuthStateChanged(auth, async (user) => {
       });
     }
 
-    // Load all data
+    // Load all categories
     categories.forEach((cat) => loadCategory(user.uid, cat));
   } else {
     loginScreen.style.display = "block";
@@ -114,21 +128,32 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ====== FIRESTORE FUNCTIONS ======
+async function ensureUserDoc(uid) {
+  const userRef = doc(db, "users", uid);
+  await setDoc(userRef, {}, { merge: true }); // creates user doc if not exists
+  return userRef;
+}
+
 async function loadCategory(uid, category) {
   const list = $(`${category}-list`);
   if (!list) return;
   list.innerHTML = "";
 
-  const snap = await getDocs(collection(db, "users", uid, category));
-  snap.forEach((docSnap) => {
-    const data = docSnap.data();
-    renderItem(list, category, docSnap.id, data.name, uid);
-  });
+  try {
+    const snap = await getDocs(collection(db, "users", uid, category));
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      renderItem(list, category, docSnap.id, data.name, uid);
+    });
+  } catch (err) {
+    console.error(`Failed to load ${category}:`, err);
+  }
 }
 
 async function addItem(uid, category, name) {
+  const userRef = await ensureUserDoc(uid);
   const id = Date.now().toString();
-  await setDoc(doc(db, "users", uid, category, id), { name });
+  await setDoc(doc(userRef, category, id), { name });
   loadCategory(uid, category);
 }
 
@@ -167,22 +192,3 @@ function renderItem(list, category, id, name, uid) {
   li.appendChild(delBtn);
   list.appendChild(li);
 }
-
-// ====== ADD BUTTONS ======
-document.addEventListener("DOMContentLoaded", () => {
-  categories.forEach((category) => {
-    const btn = $(`add-${category}`);
-    if (btn) {
-      btn.addEventListener("click", async () => {
-        const input = $(`${category}-input`);
-        if (!input.value.trim()) return;
-        await addItem(auth.currentUser.uid, category, input.value.trim());
-        input.value = "";
-      });
-    }
-  });
-});
-
-
-
-
