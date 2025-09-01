@@ -205,25 +205,36 @@ function loadItems(category, items) {
   items.forEach((item, index) => {
     const li = document.createElement("li");
 
-    // Text span
+    // Text
     const textSpan = document.createElement("span");
     textSpan.textContent = item;
 
-    // Edit functionality
-    editBtn.onclick = () => {
+    // ✎ Edit button
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "✎";
+    editBtn.style.marginLeft = "10px";
+    editBtn.onclick = async () => {
       const newValue = prompt("Edit item:", item);
       if (newValue && newValue.trim() !== "") {
-        const updatedItems = items.map((i, idx) => (idx === index ? newValue.trim() : i));
-        localStorage.setItem(storageKey, JSON.stringify(updatedItems));
-        loadItems(); // reload list with updated value
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const docRef = doc(db, category, user.uid);
+        const docSnap = await getDoc(docRef);
+        let data = docSnap.exists() ? (docSnap.data().items || []) : [];
+
+        data[index] = newValue.trim();
+        await setDoc(docRef, { items: data });
+
+        loadItems(category, data);
       }
     };
 
-    // Delete button
+    // ❌ Delete button
     const delBtn = document.createElement("button");
     delBtn.textContent = "✖";
     delBtn.style.marginLeft = "10px";
-    delBtn.style.backgroundColor = "#e74c3c"; // red
+    delBtn.style.backgroundColor = "#e74c3c";
     delBtn.style.color = "white";
     delBtn.style.border = "none";
     delBtn.style.borderRadius = "50%";
@@ -231,15 +242,6 @@ function loadItems(category, items) {
     delBtn.style.height = "24px";
     delBtn.style.cursor = "pointer";
     delBtn.style.fontSize = "14px";
-    delBtn.style.lineHeight = "20px";
-    delBtn.style.textAlign = "center";
-    delBtn.style.padding = "0";
-    delBtn.title = "Delete item";
-    
-    // Hover effect
-    delBtn.onmouseover = () => { delBtn.style.backgroundColor = "#c0392b"; };
-    delBtn.onmouseout = () => { delBtn.style.backgroundColor = "#e74c3c"; };
-
     delBtn.onclick = async () => {
       const user = auth.currentUser;
       if (!user) return;
@@ -248,18 +250,19 @@ function loadItems(category, items) {
       const docSnap = await getDoc(docRef);
       let data = docSnap.exists() ? (docSnap.data().items || []) : [];
 
-      data.splice(index, 1); // remove item
+      data.splice(index, 1);
       await setDoc(docRef, { items: data });
 
       loadItems(category, data);
     };
 
     li.appendChild(textSpan);
-    li.appendChild(delBtn);
     li.appendChild(editBtn);
+    li.appendChild(delBtn);
     list.appendChild(li);
   });
 }
+
 
 
 // Ensure bindings are set even if someone moves the script tag again
@@ -268,6 +271,7 @@ if (document.readyState === "loading") {
 } else {
   bindAuthButtons();
 }
+
 
 
 
