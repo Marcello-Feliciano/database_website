@@ -125,6 +125,78 @@ async function loadCategory(category, uid) {
   loadItems(category, data);
 }
 
+function MainPage({ user, onLogout }) {
+  const [searchTerm, setSearchTerm] = React.useState("");
+
+  // Case-insensitive filtering
+  const filterItems = (items) =>
+    items.filter((item) =>
+      item.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h2>Welcome, {user.email}</h2>
+      <button onClick={onLogout}>Logout</button>
+
+      {/* 🔎 Search Bar */}
+      <div style={{ margin: "15px 0" }}>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ padding: "5px", width: "100%", maxWidth: "300px" }}
+        />
+      </div>
+
+      {["books", "movies", "games", "comics"].map((category) => (
+        <div key={category} style={{ marginBottom: "20px" }}>
+          <h3>{category.charAt(0).toUpperCase() + category.slice(1)}</h3>
+          <ul>
+            {filterItems(user.data[category]).map((item, index) => (
+              <li key={index}>
+                {item}{" "}
+                <button
+                  onClick={() => {
+                    const newVal = prompt("Edit item:", item);
+                    if (newVal && newVal.trim() !== "") {
+                      user.data[category][index] = newVal.trim();
+                      setSearchTerm(searchTerm); // force re-render
+                    }
+                  }}
+                >
+                  ✎
+                </button>{" "}
+                <button
+                  onClick={() => {
+                    user.data[category].splice(index, 1);
+                    setSearchTerm(searchTerm); // force re-render
+                  }}
+                >
+                  ❌
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button
+            onClick={() => {
+              const newItem = prompt(`Add a new ${category.slice(0, -1)}:`);
+              if (newItem && newItem.trim() !== "") {
+                user.data[category].push(newItem.trim());
+                setSearchTerm(searchTerm); // force re-render
+              }
+            }}
+          >
+            Add {category.slice(0, -1)}
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
 function loadItems(category, items) {
   const list = document.getElementById(`${category}-list`);
   if (!list) return;
@@ -196,6 +268,7 @@ if (document.readyState === "loading") {
 } else {
   bindAuthButtons();
 }
+
 
 
 
