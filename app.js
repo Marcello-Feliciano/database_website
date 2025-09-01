@@ -18,12 +18,13 @@ import {
 
 // ====== CONFIG ======
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_APP.firebaseapp.com",
-  projectId: "YOUR_APP",
-  storageBucket: "YOUR_APP.appspot.com",
-  messagingSenderId: "SENDER_ID",
-  appId: "APP_ID",
+  apiKey: "AIzaSyBpFQYyFyMQWUHjNuIwMyb8UrT7l92ASao",
+  authDomain: "gmbcreviews.firebaseapp.com",
+  projectId: "gmbcreviews",
+  storageBucket: "gmbcreviews.firebasestorage.app",
+  messagingSenderId: "156411101412",
+  appId: "1:156411101412:web:dfea6aa2c4b3518a042cf1",
+  measurementId: "G-DH9W04ZEWL"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -181,3 +182,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
