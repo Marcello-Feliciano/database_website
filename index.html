@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>My Media Library</title>
   <link rel="stylesheet" href="style.css">
-  <script type="module" src="./app.js"></script>
 </head>
 <body>
   <h1>My Media Library</h1>
@@ -22,6 +21,7 @@
   <div id="app" style="display:none;">
     <h2>Welcome, <span id="user-email"></span></h2>
     <button id="logout-btn">Logout</button>
+    <!-- Search bar inserted by JS -->
 
     <!-- Books Section -->
     <div>
@@ -55,5 +55,7 @@
       <ul id="comics-list"></ul>
     </div>
   </div>
+
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
