@@ -1,6 +1,17 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 import { firebaseConfig } from "./firebaseConfig.js";
 
@@ -8,30 +19,64 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const signupBtn = document.getElementById("signup");
-const loginBtn = document.getElementById("login");
-const logoutBtn = document.getElementById("logout");
+// Small helper
+const $ = (id) => document.getElementById(id);
 
-signupBtn.onclick = () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  createUserWithEmailAndPassword(auth, email, password).catch(console.error);
-};
+function bindAuthButtons() {
+  const signupBtn = $("signup");
+  const loginBtn = $("login");
+  const logoutBtn = $("logout");
 
-loginBtn.onclick = () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  signInWithEmailAndPassword(auth, email, password).catch(console.error);
-};
+  if (!signupBtn || !loginBtn || !logoutBtn) {
+    console.error("Auth buttons not found. Check index.html IDs.");
+    return;
+  }
 
-logoutBtn.onclick = () => signOut(auth);
+  signupBtn.addEventListener("click", async () => {
+    const email = $("email").value.trim();
+    const password = $("password").value;
+    if (!email || !password) return alert("Please enter email and password.");
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Signup failed.");
+    }
+  });
+
+  loginBtn.addEventListener("click", async () => {
+    const email = $("email").value.trim();
+    const password = $("password").value;
+    if (!email || !password) return alert("Please enter email and password.");
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Login failed.");
+    }
+  });
+
+  logoutBtn.addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Logout failed.");
+    }
+  });
+}
 
 onAuthStateChanged(auth, async (user) => {
-  const loginScreen = document.getElementById("login-screen");
-  const appScreen = document.getElementById("app-screen");
+  const loginScreen = $("login-screen");
+  const appScreen = $("app-screen");
+
+  if (!loginScreen || !appScreen) {
+    console.error("Screens not found. Check index.html IDs.");
+    return;
+  }
 
   if (user) {
-    document.getElementById("user-email").innerText = user.email;
+    $("user-email").innerText = user.email;
     loginScreen.style.display = "none";
     appScreen.style.display = "block";
     await loadAllData(user.uid);
@@ -41,8 +86,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-
-
+// ---- Data logic (same as your working version) ----
 
 window.addItem = async (category) => {
   const user = auth.currentUser;
@@ -58,7 +102,7 @@ window.addItem = async (category) => {
 
   const docRef = doc(db, category, user.uid);
   const docSnap = await getDoc(docRef);
-  let data = docSnap.exists() ? docSnap.data().items : [];
+  let data = docSnap.exists() ? (docSnap.data().items || []) : [];
 
   data.push(value);
 
@@ -77,20 +121,24 @@ async function loadAllData(uid) {
 async function loadCategory(category, uid) {
   const docRef = doc(db, category, uid);
   const docSnap = await getDoc(docRef);
-  const data = docSnap.exists() ? docSnap.data().items : [];
+  const data = docSnap.exists() ? (docSnap.data().items || []) : [];
   loadItems(category, data);
 }
 
 function loadItems(category, items) {
   const list = document.getElementById(`${category}-list`);
+  if (!list) return;
   list.innerHTML = "";
-  items.forEach(item => {
+  items.forEach((item) => {
     const li = document.createElement("li");
     li.textContent = item;
     list.appendChild(li);
   });
 }
 
-
-
-
+// Ensure bindings are set even if someone moves the script tag again
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bindAuthButtons);
+} else {
+  bindAuthButtons();
+}
