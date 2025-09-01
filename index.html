@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>My Media Library</title>
   <link rel="stylesheet" href="style.css">
-  <script type="module" src="./app.js"></script>
 </head>
 <body>
   <h1>My Media Library</h1>
@@ -13,48 +12,51 @@
   <!-- Login / Signup Screen -->
   <div id="login-screen">
     <h2>Welcome</h2>
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
-    <br>
-    <button id="signup">Sign Up</button>
-    <button id="login">Log In</button>
+    <input type="email" id="email" placeholder="Email" autocomplete="username" />
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+    <br/>
+    <button id="signup" type="button">Sign Up</button>
+    <button id="login" type="button">Log In</button>
   </div>
 
   <!-- App Screen -->
   <div id="app-screen" style="display:none;">
-    <header>
-      <h2>Hello, <span id="user-email"></span>!</h2>
-      <button id="logout">Logout</button>
+    <header style="display:flex; gap:12px; align-items:center; justify-content:space-between;">
+      <h2 style="margin:0;">Hello, <span id="user-email"></span>!</h2>
+      <button id="logout" type="button">Logout</button>
     </header>
 
     <!-- Categories -->
     <section>
       <h3>Games</h3>
       <input id="new-games" placeholder="Add new game" />
-      <button onclick="addItem('games')">Add</button>
+      <button type="button" onclick="addItem('games')">Add</button>
       <ul id="games-list"></ul>
     </section>
 
     <section>
       <h3>Movies</h3>
       <input id="new-movies" placeholder="Add new movie" />
-      <button onclick="addItem('movies')">Add</button>
+      <button type="button" onclick="addItem('movies')">Add</button>
       <ul id="movies-list"></ul>
     </section>
 
     <section>
       <h3>Books</h3>
       <input id="new-books" placeholder="Add new book" />
-      <button onclick="addItem('books')">Add</button>
+      <button type="button" onclick="addItem('books')">Add</button>
       <ul id="books-list"></ul>
     </section>
 
     <section>
       <h3>Comics</h3>
       <input id="new-comics" placeholder="Add new comic" />
-      <button onclick="addItem('comics')">Add</button>
+      <button type="button" onclick="addItem('comics')">Add</button>
       <ul id="comics-list"></ul>
     </section>
   </div>
+
+  <!-- Load JS last so elements above exist before we bind events -->
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
