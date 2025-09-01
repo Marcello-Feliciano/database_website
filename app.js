@@ -184,6 +184,7 @@ function loadItems(category, items) {
 
     li.appendChild(textSpan);
     li.appendChild(delBtn);
+    li.appendChild(editBtn);
     list.appendChild(li);
   });
 }
@@ -195,6 +196,7 @@ if (document.readyState === "loading") {
 } else {
   bindAuthButtons();
 }
+
 
 
 
