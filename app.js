@@ -129,12 +129,34 @@ function loadItems(category, items) {
   const list = document.getElementById(`${category}-list`);
   if (!list) return;
   list.innerHTML = "";
-  items.forEach((item) => {
+
+  items.forEach((item, index) => {
     const li = document.createElement("li");
     li.textContent = item;
+
+    // Delete button
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "❌";
+    delBtn.style.marginLeft = "10px";
+    delBtn.onclick = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const docRef = doc(db, category, user.uid);
+      const docSnap = await getDoc(docRef);
+      let data = docSnap.exists() ? (docSnap.data().items || []) : [];
+
+      data.splice(index, 1); // remove item
+      await setDoc(docRef, { items: data });
+
+      loadItems(category, data);
+    };
+
+    li.appendChild(delBtn);
     list.appendChild(li);
   });
 }
+
 
 // Ensure bindings are set even if someone moves the script tag again
 if (document.readyState === "loading") {
@@ -142,3 +164,4 @@ if (document.readyState === "loading") {
 } else {
   bindAuthButtons();
 }
+
