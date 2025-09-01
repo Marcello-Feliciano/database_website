@@ -61,6 +61,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  signupBtn.addEventListener("click", async () => {
+  const email = $("email").value;
+  const password = $("password").value;
+  console.log("Signing up:", email, password);
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    console.log("Signup success");
+  } catch (err) {
+    console.error("Signup error:", err);
+  }
+});
+
   // Logout
   $("logout-btn").addEventListener("click", async () => {
     await signOut(auth);
@@ -182,5 +194,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
 
 
