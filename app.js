@@ -229,7 +229,8 @@ function renderItem(list, category, id, name, uid) {
 // ====== INITIALIZE ======
 createUI();
 
-onAuthStateChanged(auth, (user) => {
+// ====== AUTH STATE ======
+onAuthStateChanged(auth, async (user) => {
   const loginScreen = $("login-screen");
   const appScreen = $("app");
   if (!loginScreen || !appScreen) return;
@@ -238,10 +239,51 @@ onAuthStateChanged(auth, (user) => {
     $("user-email").innerText = user.email;
     loginScreen.style.display = "none";
     appScreen.style.display = "block";
+
+    // Ensure all category collections exist for this user
+    await Promise.all(categories.map(async (category) => {
+      const catSnap = await getDocs(collection(db, "users", user.uid, category));
+      if (catSnap.empty) {
+        // Create a dummy document to initialize collection if empty
+        const dummyId = Date.now().toString();
+        await setDoc(doc(db, "users", user.uid, category, dummyId), { name: `Welcome to ${category}!` });
+      }
+    }));
+
+    // Create search bar if not present
+    if (!document.getElementById("search")) {
+      const searchDiv = document.createElement("div");
+      searchDiv.style.margin = "15px 0";
+      const searchInput = document.createElement("input");
+      searchInput.type = "text";
+      searchInput.id = "search";
+      searchInput.placeholder = "Search...";
+      searchInput.style.padding = "5px";
+      searchInput.style.width = "100%";
+      searchInput.style.maxWidth = "300px";
+      searchDiv.appendChild(searchInput);
+      appScreen.insertBefore(searchDiv, appScreen.firstChild);
+
+      // Search functionality
+      searchInput.addEventListener("input", () => {
+        const term = searchInput.value.toLowerCase();
+        categories.forEach((category) => {
+          const list = $(`${category}-list`);
+          Array.from(list.children).forEach((li) => {
+            const text = li.querySelector("span").textContent.toLowerCase();
+            li.style.display = text.includes(term) ? "" : "none";
+          });
+        });
+      });
+    }
+
     // Load all data
-    categories.forEach((cat) => loadCategory(user.uid, cat));
+    await Promise.all(categories.map(cat => loadCategory(user.uid, cat)));
+
   } else {
     loginScreen.style.display = "block";
     appScreen.style.display = "none";
   }
 });
+
+
