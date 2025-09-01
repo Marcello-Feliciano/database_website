@@ -137,6 +137,16 @@ function loadItems(category, items) {
     const textSpan = document.createElement("span");
     textSpan.textContent = item;
 
+    // Edit functionality
+    editBtn.onclick = () => {
+      const newValue = prompt("Edit item:", item);
+      if (newValue && newValue.trim() !== "") {
+        const updatedItems = items.map((i, idx) => (idx === index ? newValue.trim() : i));
+        localStorage.setItem(storageKey, JSON.stringify(updatedItems));
+        loadItems(); // reload list with updated value
+      }
+    };
+
     // Delete button
     const delBtn = document.createElement("button");
     delBtn.textContent = "✖";
@@ -185,6 +195,7 @@ if (document.readyState === "loading") {
 } else {
   bindAuthButtons();
 }
+
 
 
 
