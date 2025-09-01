@@ -1,177 +1,75 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+// ========== Firebase Setup ==========
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
 import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+  onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 import {
   getFirestore,
   doc,
-  getDoc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+  setDoc,
+  getDocs,
+  collection,
+  deleteDoc,
+  updateDoc,
+} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-import { firebaseConfig } from "./firebaseConfig.js";
+// Replace with your Firebase config
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_APP.firebaseapp.com",
+  projectId: "YOUR_APP",
+  storageBucket: "YOUR_APP.appspot.com",
+  messagingSenderId: "SENDER_ID",
+  appId: "APP_ID",
+};
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Small helper
+// ========== Helpers ==========
 const $ = (id) => document.getElementById(id);
 
-function bindAuthButtons() {
-  const signupBtn = $("signup");
-  const loginBtn = $("login");
-  const logoutBtn = $("logout");
-
-  if (!signupBtn || !loginBtn || !logoutBtn) {
-    console.error("Auth buttons not found. Check index.html IDs.");
-    return;
-  }
-
-  signupBtn.addEventListener("click", async () => {
-    const email = $("email").value.trim();
-    const password = $("password").value;
-    if (!email || !password) return alert("Please enter email and password.");
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Signup failed.");
-    }
-  });
-
-  loginBtn.addEventListener("click", async () => {
-    const email = $("email").value.trim();
-    const password = $("password").value;
-    if (!email || !password) return alert("Please enter email and password.");
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Login failed.");
-    }
-  });
-
-  logoutBtn.addEventListener("click", async () => {
-    try {
-      await signOut(auth);
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Logout failed.");
-    }
-  });
-}
-
-onAuthStateChanged(auth, async (user) => {
-  const loginScreen = $("login-screen");
-  const appScreen = $("app-screen");
-
-  if (!loginScreen || !appScreen) {
-    console.error("Screens not found. Check index.html IDs.");
-    return;
-  }
-
-  if (user) {
-    $("user-email").innerText = user.email;
-    loginScreen.style.display = "none";
-    appScreen.style.display = "block";
-    await loadAllData(user.uid);
-  } else {
-    loginScreen.style.display = "block";
-    appScreen.style.display = "none";
+// ========== Authentication ==========
+$("signup-btn").addEventListener("click", async () => {
+  const email = $("email").value;
+  const password = $("password").value;
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+  } catch (err) {
+    alert(err.message);
   }
 });
 
-
-just to double check everything so far. am i doing everything correctly in my code:
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-
-import { firebaseConfig } from "./firebaseConfig.js";
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// Small helper
-const $ = (id) => document.getElementById(id);
-
-function bindAuthButtons() {
-  const signupBtn = $("signup");
-  const loginBtn = $("login");
-  const logoutBtn = $("logout");
-
-  if (!signupBtn || !loginBtn || !logoutBtn) {
-    console.error("Auth buttons not found. Check index.html IDs.");
-    return;
+$("login-btn").addEventListener("click", async () => {
+  const email = $("email").value;
+  const password = $("password").value;
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (err) {
+    alert(err.message);
   }
+});
 
-  signupBtn.addEventListener("click", async () => {
-    const email = $("email").value.trim();
-    const password = $("password").value;
-    if (!email || !password) return alert("Please enter email and password.");
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Signup failed.");
-    }
-  });
+$("logout-btn").addEventListener("click", async () => {
+  await signOut(auth);
+});
 
-  loginBtn.addEventListener("click", async () => {
-    const email = $("email").value.trim();
-    const password = $("password").value;
-    if (!email || !password) return alert("Please enter email and password.");
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Login failed.");
-    }
-  });
-
-  logoutBtn.addEventListener("click", async () => {
-    try {
-      await signOut(auth);
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Logout failed.");
-    }
-  });
-}
-
+// ========== Auth State Change ==========
 onAuthStateChanged(auth, async (user) => {
   const loginScreen = $("login-screen");
-  const appScreen = $("app-screen"); // change this to your actual app div ID, e.g., $("app")
-
-  if (!loginScreen || !appScreen) {
-    console.error("Screens not found. Check index.html IDs.");
-    return;
-  }
+  const appScreen = $("app"); // << use your real app div id here
 
   if (user) {
     $("user-email").innerText = user.email;
     loginScreen.style.display = "none";
     appScreen.style.display = "block";
 
-    // --- Only create the search bar AFTER login ---
+    // Insert search bar if not already created
     if (!document.getElementById("search")) {
       const searchDiv = document.createElement("div");
       searchDiv.style.margin = "15px 0";
@@ -185,14 +83,15 @@ onAuthStateChanged(auth, async (user) => {
       searchDiv.appendChild(searchInput);
       appScreen.insertBefore(searchDiv, appScreen.firstChild);
 
-      // Add search functionality
+      // Hook up search functionality
       searchInput.addEventListener("input", () => {
         const term = searchInput.value.toLowerCase();
         ["books", "movies", "games", "comics"].forEach((category) => {
           const list = $(`${category}-list`);
           if (!list) return;
           Array.from(list.children).forEach((li) => {
-            const text = li.querySelector("span")?.textContent.toLowerCase() || "";
+            const text =
+              li.querySelector("span")?.textContent.toLowerCase() || "";
             li.style.display = text.includes(term) ? "" : "none";
           });
         });
@@ -206,371 +105,78 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// ---- Data logic (same as your working version) ----
-
-window.addItem = async (category) => {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  const input = document.getElementById(`new-${category}`);
-  if (!input) {
-    console.error(`Input element #new-${category} not found`);
-    return;
-  }
-  const value = input.value.trim();
-  if (!value) return;
-
-  const docRef = doc(db, category, user.uid);
-  const docSnap = await getDoc(docRef);
-  let data = docSnap.exists() ? (docSnap.data().items || []) : [];
-
-  data.push(value);
-
-  await setDoc(docRef, { items: data });
-  input.value = "";
-  loadItems(category, data);
-};
-
+// ========== Firestore ==========
 async function loadAllData(uid) {
-  await loadCategory("games", uid);
-  await loadCategory("movies", uid);
-  await loadCategory("books", uid);
-  await loadCategory("comics", uid);
-}
-
-async function loadCategory(category, uid) {
-  const docRef = doc(db, category, uid);
-  const docSnap = await getDoc(docRef);
-  const data = docSnap.exists() ? (docSnap.data().items || []) : [];
-  loadItems(category, data);
-}
-
-function MainPage({ user, onLogout }) {
-  const [searchTerm, setSearchTerm] = React.useState("");
-
-  // Case-insensitive filtering
-  const filterItems = (items) =>
-    items.filter((item) =>
-      item.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-  return (
-    <div style={{ padding: "20px" }}>
-      <h2>Welcome, {user.email}</h2>
-      <button onClick={onLogout}>Logout</button>
-
-      {/* 🔎 Search Bar */}
-      <div style={{ margin: "15px 0" }}>
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ padding: "5px", width: "100%", maxWidth: "300px" }}
-        />
-      </div>
-
-      {["books", "movies", "games", "comics"].map((category) => (
-        <div key={category} style={{ marginBottom: "20px" }}>
-          <h3>{category.charAt(0).toUpperCase() + category.slice(1)}</h3>
-          <ul>
-            {filterItems(user.data[category]).map((item, index) => (
-              <li key={index}>
-                {item}{" "}
-                <button
-                  onClick={() => {
-                    const newVal = prompt("Edit item:", item);
-                    if (newVal && newVal.trim() !== "") {
-                      user.data[category][index] = newVal.trim();
-                      setSearchTerm(searchTerm); // force re-render
-                    }
-                  }}
-                >
-                  ✎
-                </button>{" "}
-                <button
-                  onClick={() => {
-                    user.data[category].splice(index, 1);
-                    setSearchTerm(searchTerm); // force re-render
-                  }}
-                >
-                  ❌
-                </button>
-              </li>
-            ))}
-          </ul>
-          <button
-            onClick={() => {
-              const newItem = prompt(`Add a new ${category.slice(0, -1)}:`);
-              if (newItem && newItem.trim() !== "") {
-                user.data[category].push(newItem.trim());
-                setSearchTerm(searchTerm); // force re-render
-              }
-            }}
-          >
-            Add {category.slice(0, -1)}
-          </button>
-        </div>
-      ))}
-    </div>
+  ["books", "movies", "games", "comics"].forEach((cat) =>
+    loadCategory(uid, cat)
   );
 }
 
-
-function loadItems(category, items) {
-  const list = document.getElementById(`${category}-list`);
+async function loadCategory(uid, category) {
+  const list = $(`${category}-list`);
   if (!list) return;
   list.innerHTML = "";
 
-  items.forEach((item, index) => {
-    const li = document.createElement("li");
-
-    // Text span
-    const textSpan = document.createElement("span");
-    textSpan.textContent = item;
-
-    // Edit functionality
-    editBtn.onclick = () => {
-      const newValue = prompt("Edit item:", item);
-      if (newValue && newValue.trim() !== "") {
-        const updatedItems = items.map((i, idx) => (idx === index ? newValue.trim() : i));
-        localStorage.setItem(storageKey, JSON.stringify(updatedItems));
-        loadItems(); // reload list with updated value
-      }
-    };
-
-    // Delete button
-    const delBtn = document.createElement("button");
-    delBtn.textContent = "✖";
-    delBtn.style.marginLeft = "10px";
-    delBtn.style.backgroundColor = "#e74c3c"; // red
-    delBtn.style.color = "white";
-    delBtn.style.border = "none";
-    delBtn.style.borderRadius = "50%";
-    delBtn.style.width = "24px";
-    delBtn.style.height = "24px";
-    delBtn.style.cursor = "pointer";
-    delBtn.style.fontSize = "14px";
-    delBtn.style.lineHeight = "20px";
-    delBtn.style.textAlign = "center";
-    delBtn.style.padding = "0";
-    delBtn.title = "Delete item";
-    
-    // Hover effect
-    delBtn.onmouseover = () => { delBtn.style.backgroundColor = "#c0392b"; };
-    delBtn.onmouseout = () => { delBtn.style.backgroundColor = "#e74c3c"; };
-
-    delBtn.onclick = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const docRef = doc(db, category, user.uid);
-      const docSnap = await getDoc(docRef);
-      let data = docSnap.exists() ? (docSnap.data().items || []) : [];
-
-      data.splice(index, 1); // remove item
-      await setDoc(docRef, { items: data });
-
-      loadItems(category, data);
-    };
-
-    li.appendChild(textSpan);
-    li.appendChild(delBtn);
-    li.appendChild(editBtn);
-    list.appendChild(li);
+  const snap = await getDocs(collection(db, "users", uid, category));
+  snap.forEach((docSnap) => {
+    const data = docSnap.data();
+    renderItem(list, category, docSnap.id, data.name);
   });
 }
 
-
-// Ensure bindings are set even if someone moves the script tag again
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", bindAuthButtons);
-} else {
-  bindAuthButtons();
+async function addItem(uid, category, name) {
+  const id = Date.now().toString();
+  await setDoc(doc(db, "users", uid, category, id), { name });
+  loadCategory(uid, category);
 }
 
+async function deleteItem(uid, category, id) {
+  await deleteDoc(doc(db, "users", uid, category, id));
+  loadCategory(uid, category);
+}
 
+async function updateItem(uid, category, id, newName) {
+  await updateDoc(doc(db, "users", uid, category, id), { name: newName });
+  loadCategory(uid, category);
+}
 
-// ---- Data logic (same as your working version) ----
+// ========== Rendering ==========
+function renderItem(list, category, id, name) {
+  const li = document.createElement("li");
 
-window.addItem = async (category) => {
-  const user = auth.currentUser;
-  if (!user) return;
+  const span = document.createElement("span");
+  span.textContent = name;
 
-  const input = document.getElementById(`new-${category}`);
-  if (!input) {
-    console.error(`Input element #new-${category} not found`);
-    return;
+  const editBtn = document.createElement("button");
+  editBtn.textContent = "Edit";
+  editBtn.onclick = () => {
+    const newName = prompt("Edit name:", name);
+    if (newName) updateItem(auth.currentUser.uid, category, id, newName);
+  };
+
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "Delete";
+  delBtn.onclick = () => {
+    if (confirm("Delete this item?")) {
+      deleteItem(auth.currentUser.uid, category, id);
+    }
+  };
+
+  li.appendChild(span);
+  li.appendChild(editBtn);
+  li.appendChild(delBtn);
+  list.appendChild(li);
+}
+
+// ========== Add Buttons ==========
+["books", "movies", "games", "comics"].forEach((category) => {
+  const btn = $(`add-${category}`);
+  if (btn) {
+    btn.addEventListener("click", async () => {
+      const input = $(`${category}-input`);
+      if (!input.value.trim()) return;
+      await addItem(auth.currentUser.uid, category, input.value.trim());
+      input.value = "";
+    });
   }
-  const value = input.value.trim();
-  if (!value) return;
-
-  const docRef = doc(db, category, user.uid);
-  const docSnap = await getDoc(docRef);
-  let data = docSnap.exists() ? (docSnap.data().items || []) : [];
-
-  data.push(value);
-
-  await setDoc(docRef, { items: data });
-  input.value = "";
-  loadItems(category, data);
-};
-
-async function loadAllData(uid) {
-  await loadCategory("games", uid);
-  await loadCategory("movies", uid);
-  await loadCategory("books", uid);
-  await loadCategory("comics", uid);
-}
-
-async function loadCategory(category, uid) {
-  const docRef = doc(db, category, uid);
-  const docSnap = await getDoc(docRef);
-  const data = docSnap.exists() ? (docSnap.data().items || []) : [];
-  loadItems(category, data);
-}
-
-function MainPage({ user, onLogout }) {
-  const [searchTerm, setSearchTerm] = React.useState("");
-
-  // Case-insensitive filtering
-  const filterItems = (items) =>
-    items.filter((item) =>
-      item.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-  return (
-    <div style={{ padding: "20px" }}>
-      <h2>Welcome, {user.email}</h2>
-      <button onClick={onLogout}>Logout</button>
-
-      {/* 🔎 Search Bar */}
-      <div style={{ margin: "15px 0" }}>
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ padding: "5px", width: "100%", maxWidth: "300px" }}
-        />
-      </div>
-
-      {["books", "movies", "games", "comics"].map((category) => (
-        <div key={category} style={{ marginBottom: "20px" }}>
-          <h3>{category.charAt(0).toUpperCase() + category.slice(1)}</h3>
-          <ul>
-            {filterItems(user.data[category]).map((item, index) => (
-              <li key={index}>
-                {item}{" "}
-                <button
-                  onClick={() => {
-                    const newVal = prompt("Edit item:", item);
-                    if (newVal && newVal.trim() !== "") {
-                      user.data[category][index] = newVal.trim();
-                      setSearchTerm(searchTerm); // force re-render
-                    }
-                  }}
-                >
-                  ✎
-                </button>{" "}
-                <button
-                  onClick={() => {
-                    user.data[category].splice(index, 1);
-                    setSearchTerm(searchTerm); // force re-render
-                  }}
-                >
-                  ❌
-                </button>
-              </li>
-            ))}
-          </ul>
-          <button
-            onClick={() => {
-              const newItem = prompt(`Add a new ${category.slice(0, -1)}:`);
-              if (newItem && newItem.trim() !== "") {
-                user.data[category].push(newItem.trim());
-                setSearchTerm(searchTerm); // force re-render
-              }
-            }}
-          >
-            Add {category.slice(0, -1)}
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-
-function loadItems(category, items) {
-  const list = document.getElementById(`${category}-list`);
-  if (!list) return;
-  list.innerHTML = "";
-
-  items.forEach((item, index) => {
-    const li = document.createElement("li");
-
-    // Text span
-    const textSpan = document.createElement("span");
-    textSpan.textContent = item;
-
-    // Edit functionality
-    editBtn.onclick = () => {
-      const newValue = prompt("Edit item:", item);
-      if (newValue && newValue.trim() !== "") {
-        const updatedItems = items.map((i, idx) => (idx === index ? newValue.trim() : i));
-        localStorage.setItem(storageKey, JSON.stringify(updatedItems));
-        loadItems(); // reload list with updated value
-      }
-    };
-
-    // Delete button
-    const delBtn = document.createElement("button");
-    delBtn.textContent = "✖";
-    delBtn.style.marginLeft = "10px";
-    delBtn.style.backgroundColor = "#e74c3c"; // red
-    delBtn.style.color = "white";
-    delBtn.style.border = "none";
-    delBtn.style.borderRadius = "50%";
-    delBtn.style.width = "24px";
-    delBtn.style.height = "24px";
-    delBtn.style.cursor = "pointer";
-    delBtn.style.fontSize = "14px";
-    delBtn.style.lineHeight = "20px";
-    delBtn.style.textAlign = "center";
-    delBtn.style.padding = "0";
-    delBtn.title = "Delete item";
-    
-    // Hover effect
-    delBtn.onmouseover = () => { delBtn.style.backgroundColor = "#c0392b"; };
-    delBtn.onmouseout = () => { delBtn.style.backgroundColor = "#e74c3c"; };
-
-    delBtn.onclick = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const docRef = doc(db, category, user.uid);
-      const docSnap = await getDoc(docRef);
-      let data = docSnap.exists() ? (docSnap.data().items || []) : [];
-
-      data.splice(index, 1); // remove item
-      await setDoc(docRef, { items: data });
-
-      loadItems(category, data);
-    };
-
-    li.appendChild(textSpan);
-    li.appendChild(delBtn);
-    li.appendChild(editBtn);
-    list.appendChild(li);
-  });
-}
-
-
-// Ensure bindings are set even if someone moves the script tag again
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", bindAuthButtons);
-} else {
-  bindAuthButtons();
-}
-
+});
