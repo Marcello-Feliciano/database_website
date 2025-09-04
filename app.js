@@ -252,7 +252,3 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
-
-
-
-
