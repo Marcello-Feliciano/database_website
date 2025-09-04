@@ -196,6 +196,7 @@ async function addItem(uid, category, name) {
   } catch (err) {
     console.error("Add error:", err);
   }
+}
   async function loadCategory(uid, category) {
   const list = $(`${category}-list`);
   if (!list) return;
@@ -265,5 +266,6 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
