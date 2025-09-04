@@ -178,12 +178,14 @@ async function loadCategory(uid, category) {
   list.innerHTML = "";
   try {
     const snap = await getDocs(collection(db, "users", uid, category));
+    console.log(`Loaded ${snap.size} docs from ${category}`);
     snap.forEach((docSnap) => {
+      console.log("Doc:", docSnap.id, docSnap.data());
       const data = docSnap.data();
       renderItem(list, category, docSnap.id, data.name, uid);
     });
   } catch (err) {
-    console.error(`Failed to load ${category}:`, err);
+    console.error(`Load error for ${category}:`, err);
   }
 }
 
@@ -195,22 +197,6 @@ async function addItem(uid, category, name) {
     console.log("Added successfully");
   } catch (err) {
     console.error("Add error:", err);
-  }
-}
-  async function loadCategory(uid, category) {
-  const list = $(`${category}-list`);
-  if (!list) return;
-  list.innerHTML = "";
-  try {
-    const snap = await getDocs(collection(db, "users", uid, category));
-    console.log(`Loaded ${snap.size} docs from ${category}`);
-    snap.forEach((docSnap) => {
-      console.log("Doc:", docSnap.id, docSnap.data());
-      const data = docSnap.data();
-      renderItem(list, category, docSnap.id, data.name, uid);
-    });
-  } catch (err) {
-    console.error(`Load error for ${category}:`, err);
   }
 }
 
@@ -266,6 +252,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
