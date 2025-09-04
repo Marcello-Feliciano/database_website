@@ -89,4 +89,3 @@ function loadItems(category, items) {
   });
 }
 
-
