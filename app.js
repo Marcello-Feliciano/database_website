@@ -72,18 +72,17 @@ function createUI() {
       padding: 0;
     }
     li {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 4px;
-      padding: 6px 8px;
-      background: #fff;
-      border-radius: 6px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    display: grid;
+    grid-template-columns: 1fr auto; /* text takes full width, buttons only as much as needed */
+    align-items: center;
+    margin-bottom: 4px;
+    padding: 6px 8px;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     li span {
-      flex: 1;
-      margin-right: 10px;
+      text-align: center; /* centers text inside its grid cell */
     }
     #app {
       max-width: 500px;
@@ -330,6 +329,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
