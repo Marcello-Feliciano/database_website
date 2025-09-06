@@ -75,7 +75,6 @@ function createUI() {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px; /* space between text and buttons */
       margin-bottom: 4px;
       padding: 6px 8px;
       background: #fff;
@@ -83,8 +82,8 @@ function createUI() {
       box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     li span {
-      flex: none;
-      text-align: center; /* center text inside span */
+      flex: 1;
+      margin-right: 10px;
     }
     #app {
       max-width: 500px;
@@ -331,6 +330,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
