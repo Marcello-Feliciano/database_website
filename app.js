@@ -18,19 +18,6 @@ import {
   query,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-import { updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-
-async function removeSubcategories(uid, category) {
-  const q = query(collection(db, "users", uid, category));
-  const snap = await getDocs(q);
-  snap.forEach(async (docSnap) => {
-    await updateDoc(doc(db, "users", uid, category, docSnap.id), {
-      subcategory: deleteField()
-    });
-  });
-}
-
-
 // ====== CONFIG ======
 const firebaseConfig = {
   apiKey: "AIzaSyBpFQYyFyMQWUHjNuIwMyb8UrT7l92ASao",
@@ -373,4 +360,3 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
-
