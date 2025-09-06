@@ -188,7 +188,7 @@ function createUI() {
     const list = document.createElement("ul");
     list.id = `${category}-list`;
 
-    section.append(title, input, addBtn, list);
+    section.append(title, input, subSelect, addBtn, list);
     appDiv.appendChild(section);
   });
 
@@ -230,7 +230,7 @@ function createUI() {
       if (!input.value.trim()) return;
       const user = auth.currentUser;
       if (!user) return alert("Not logged in.");
-      await addItem(user.uid, category, input.value.trim());
+      await addItem(user.uid, category, input.value.trim(), subSelect.value);
       input.value = "";
       subSelect.value = ""; // reset dropdown
     });
@@ -276,7 +276,7 @@ function listenToCategory(uid, category) {
 }
 
 // Add item with duplicate prevention
-async function addItem(uid, category, name) {
+async function addItem(uid, category, name, subcategory = "") {
   const normalized = name.trim().toLowerCase();
   if (!normalized) return;
 
@@ -293,7 +293,7 @@ async function addItem(uid, category, name) {
   }
 
   const id = Date.now().toString();
-  console.log("Adding:", { uid, category, id, name });
+  console.log("Adding:", { uid, category, id, name, subcategory });
 
   try {
     await setDoc(doc(db, "users", uid, category, id), { name, subcategory });
@@ -374,3 +374,4 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
