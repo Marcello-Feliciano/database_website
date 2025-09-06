@@ -38,7 +38,68 @@ const $ = (id) => document.getElementById(id);
 
 // ====== CREATE UI ======
 function createUI() {
+  
+  const style = document.createElement("style");
+  style.textContent = `
+    body {
+      font-family: "Inter", Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+    input {
+      padding: 6px 10px;
+      margin-right: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    button {
+      padding: 5px 8px;
+      font-size: 13px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #555;
+      color: white;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #333;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      padding: 6px 8px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    li span {
+      flex: 1;
+      margin-right: 10px;
+    }
+    #app {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    h3 {
+      margin-bottom: 6px;
+    }
+    #login-screen input, #login-screen button {
+      margin: 4px 0;
+    }
+  `;
+  document.head.appendChild(style);
+  
   document.body.innerHTML = "";
+  
 
   // --- Login screen ---
   const loginDiv = document.createElement("div");
@@ -234,14 +295,14 @@ function renderItem(list, category, id, name, uid) {
   span.textContent = name;
 
   const editBtn = document.createElement("button");
-  editBtn.textContent = "Edit";
+ editBtn.innerHTML = "✏️"; // pencil icon
   editBtn.onclick = () => {
     const newName = prompt("Edit name:", name);
     if (newName && newName.trim()) updateItem(uid, category, id, newName.trim());
   };
 
   const delBtn = document.createElement("button");
-  delBtn.textContent = "Delete";
+  delBtn.innerHTML = "🗑️"; // trash icon
   delBtn.onclick = () => {
     if (confirm("Delete this item?")) deleteItem(uid, category, id);
   };
@@ -269,3 +330,4 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
