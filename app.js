@@ -296,7 +296,7 @@ function renderItem(list, category, id, name, uid) {
   const li = document.createElement("li");
 
   const textSpan = document.createElement("span");
-  textSpan.textContent = doc.data().name;
+  textSpan.textContent = name;
   
   const btnContainer = document.createElement("div");
   btnContainer.className = "btn-container";
@@ -312,7 +312,8 @@ function renderItem(list, category, id, name, uid) {
   
   li.appendChild(textSpan);
   li.appendChild(btnContainer);
-
+  
+  list.appendChild(li);
 }
 
 // ====== INITIALIZE ======
@@ -334,6 +335,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
