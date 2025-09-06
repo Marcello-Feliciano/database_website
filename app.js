@@ -1,5 +1,4 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-import { getDocs } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -17,6 +16,7 @@ import {
   updateDoc,
   onSnapshot,
   query,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
 // ====== CONFIG ======
@@ -360,6 +360,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
