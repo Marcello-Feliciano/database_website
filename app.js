@@ -295,45 +295,49 @@ async function addItem(uid, category, name) {
 function renderItem(list, category, id, name, uid) {
   const li = document.createElement("li");
 
+  // --- Text span ---
   const textSpan = document.createElement("span");
   textSpan.textContent = name;
-  
+
+  // --- Buttons container ---
   const btnContainer = document.createElement("div");
   btnContainer.className = "btn-container";
-  
+
+  // --- Edit button ---
   const editBtn = document.createElement("button");
   editBtn.textContent = "✏️";
   editBtn.addEventListener("click", async () => {
-    const newName = prompt("Edit item:", name);
+    const newName = prompt("Edit item:", textSpan.textContent);
     if (newName && newName.trim()) {
       try {
         await updateItem(uid, category, id, newName.trim());
-        // Firestore onSnapshot will update the UI automatically
+        // no need to manually update textSpan — Firestore snapshot will refresh it
       } catch (err) {
         console.error("Update failed:", err);
       }
     }
   });
-  
+
+  // --- Delete button ---
   const delBtn = document.createElement("button");
   delBtn.textContent = "🗑️";
   delBtn.addEventListener("click", async () => {
-    if (confirm("Delete this item?")) {
+    if (confirm(`Delete "${textSpan.textContent}"?`)) {
       try {
         await deleteItem(uid, category, id);
-        // Firestore onSnapshot will remove it automatically
+        // snapshot listener will auto-remove from UI
       } catch (err) {
         console.error("Delete failed:", err);
       }
     }
   });
-  
+
   btnContainer.appendChild(editBtn);
   btnContainer.appendChild(delBtn);
-  
+
   li.appendChild(textSpan);
   li.appendChild(btnContainer);
-  
+
   list.appendChild(li);
 }
 
@@ -356,6 +360,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
