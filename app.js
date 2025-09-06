@@ -303,9 +303,30 @@ function renderItem(list, category, id, name, uid) {
   
   const editBtn = document.createElement("button");
   editBtn.textContent = "✏️";
+  editBtn.addEventListener("click", async () => {
+    const newName = prompt("Edit item:", name);
+    if (newName && newName.trim()) {
+      try {
+        await updateItem(uid, category, id, newName.trim());
+        // Firestore onSnapshot will update the UI automatically
+      } catch (err) {
+        console.error("Update failed:", err);
+      }
+    }
+  });
   
   const delBtn = document.createElement("button");
   delBtn.textContent = "🗑️";
+  delBtn.addEventListener("click", async () => {
+    if (confirm("Delete this item?")) {
+      try {
+        await deleteItem(uid, category, id);
+        // Firestore onSnapshot will remove it automatically
+      } catch (err) {
+        console.error("Delete failed:", err);
+      }
+    }
+  });
   
   btnContainer.appendChild(editBtn);
   btnContainer.appendChild(delBtn);
@@ -335,6 +356,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
