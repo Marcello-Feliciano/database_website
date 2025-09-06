@@ -270,7 +270,7 @@ function listenToCategory(uid, category) {
     list.innerHTML = ""; // clear and rebuild
     snap.forEach((docSnap) => {
       const data = docSnap.data();
-      renderItem(list, category, docSnap.id, data.name, uid);
+      renderItem(list, category, docSnap.id, data.name, uid, data.subcategory || "");
     });
   });
 }
@@ -374,6 +374,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
