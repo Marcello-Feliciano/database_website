@@ -170,8 +170,7 @@ function createUI() {
 
     const addBtn = document.createElement("button");
     addBtn.id = `add-${category}`;
-    addBtn.style.fontFamily = "Segoe UI Symbol, Arial, sans-serif";
-    addBtn.textContent = "➕";
+    addBtn.innerHTML = "&#10133;"; // Unicode decimal for ➕
 
     const list = document.createElement("ul");
     list.id = `${category}-list`;
@@ -331,6 +330,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
