@@ -5,7 +5,8 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+}
+ from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 import {
   getFirestore,
   collection,
@@ -14,6 +15,8 @@ import {
   getDocs,
   deleteDoc,
   updateDoc,
+  onSnapshot,
+  query,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
 // ====== CONFIG ======
@@ -210,6 +213,50 @@ async function updateItem(uid, category, id, newName) {
   loadCategory(uid, category);
 }
 
+// Real-time listener for a category
+function listenToCategory(uid, category) {
+  const list = $(`${category}-list`);
+  if (!list) return;
+  list.innerHTML = "";
+
+  const q = query(collection(db, "users", uid, category));
+  onSnapshot(q, (snap) => {
+    list.innerHTML = ""; // clear and rebuild
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      renderItem(list, category, docSnap.id, data.name, uid);
+    });
+  });
+}
+
+// Add item with duplicate prevention
+async function addItem(uid, category, name) {
+  const normalized = name.trim().toLowerCase();
+  if (!normalized) return;
+
+  // Check for duplicates in real-time snapshot
+  const list = $(`${category}-list`);
+  const existing = Array.from(list.children).some((li) => {
+    const text = li.querySelector("span").textContent.toLowerCase();
+    return text === normalized;
+  });
+
+  if (existing) {
+    alert(`"${name}" already exists in ${category}.`);
+    return;
+  }
+
+  const id = Date.now().toString();
+  console.log("Adding:", { uid, category, id, name });
+
+  try {
+    await setDoc(doc(db, "users", uid, category, id), { name });
+    console.log("Added successfully");
+  } catch (err) {
+    console.error("Add error:", err);
+  }
+}
+
 // ====== RENDER ITEMS ======
 function renderItem(list, category, id, name, uid) {
   const li = document.createElement("li");
@@ -245,10 +292,11 @@ onAuthStateChanged(auth, (user) => {
     $("user-email").innerText = user.email;
     loginScreen.style.display = "none";
     appScreen.style.display = "block";
-    // Load all data
-    categories.forEach((cat) => loadCategory(user.uid, cat));
+    // Start real-time listeners
+    categories.forEach((cat) => listenToCategory(user.uid, cat));
   } else {
     loginScreen.style.display = "block";
     appScreen.style.display = "none";
   }
 });
+
