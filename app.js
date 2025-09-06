@@ -171,6 +171,16 @@ function createUI() {
     input.id = `${category}-input`;
     input.placeholder = `Add new ${category.slice(0, -1)}`;
 
+    // Subcategory dropdown (hardcoded for now)
+    const subSelect = document.createElement("select");
+    subSelect.id = `${category}-sub`;
+    ["", "Fantasy", "Sci-Fi", "Nonfiction"].forEach((opt) => {
+      const o = document.createElement("option");
+      o.value = opt.toLowerCase();
+      o.textContent = opt || "Select subcategory";
+      subSelect.appendChild(o);
+    });
+
     const addBtn = document.createElement("button");
     addBtn.id = `add-${category}`;
     addBtn.textContent = "➕"; // the plus-in-circle character
@@ -216,11 +226,13 @@ function createUI() {
     const btn = $(`add-${category}`);
     btn.addEventListener("click", async () => {
       const input = $(`${category}-input`);
+      const subSelect = $(`${category}-sub`);
       if (!input.value.trim()) return;
       const user = auth.currentUser;
       if (!user) return alert("Not logged in.");
       await addItem(user.uid, category, input.value.trim());
       input.value = "";
+      subSelect.value = ""; // reset dropdown
     });
   });
 
@@ -284,7 +296,7 @@ async function addItem(uid, category, name) {
   console.log("Adding:", { uid, category, id, name });
 
   try {
-    await setDoc(doc(db, "users", uid, category, id), { name });
+    await setDoc(doc(db, "users", uid, category, id), { name, subcategory });
     console.log("Added successfully");
   } catch (err) {
     console.error("Add error:", err);
@@ -292,12 +304,14 @@ async function addItem(uid, category, name) {
 }
 
 // ====== RENDER ITEMS ======
-function renderItem(list, category, id, name, uid) {
+function renderItem(list, category, id, name, uid, subcategory = "") {
   const li = document.createElement("li");
 
   // --- Text span ---
   const textSpan = document.createElement("span");
-  textSpan.textContent = name;
+  textSpan.textContent = subcategory 
+    ? `${name} (${subcategory})`
+    : name;
 
   // --- Buttons container ---
   const btnContainer = document.createElement("div");
@@ -360,6 +374,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
