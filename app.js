@@ -75,6 +75,7 @@ function createUI() {
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 10px; /* space between text and buttons */
       margin-bottom: 4px;
       padding: 6px 8px;
       background: #fff;
@@ -330,6 +331,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
