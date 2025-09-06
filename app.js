@@ -264,7 +264,7 @@ async function importData(uid, file) {
     }
   }
 
-  categories.forEach((cat) => snap.docChanges(uid, cat));
+  categories.forEach((cat) => snap.listenToCategory(uid, cat));
 
   if (skipped.length) {
     alert("Skipped duplicates:\n" + skipped.join("\n"));
@@ -275,7 +275,7 @@ async function importData(uid, file) {
 
 
 // Real-time listener for a category
-function snap.docChanges(uid, category) {
+function snap.listenToCategory(uid, category) {
   const list = $(`${category}-list`);
   if (!list) return;
   list.innerHTML = "";
@@ -354,12 +354,13 @@ onAuthStateChanged(auth, (user) => {
     loginScreen.style.display = "none";
     appScreen.style.display = "block";
     // Start real-time listeners
-    categories.forEach((cat) => snap.docChanges(user.uid, cat));
+    categories.forEach((cat) => snap.listenToCategory(user.uid, cat));
   } else {
     loginScreen.style.display = "block";
     appScreen.style.display = "none";
   }
 });
+
 
 
 
