@@ -40,7 +40,7 @@ const $ = (id) => document.getElementById(id);
 function createUI() {
   document.body.innerHTML = "";
 
-  // --- Login screen ---
+  // ===== LOGIN SCREEN =====
   const loginDiv = document.createElement("div");
   loginDiv.id = "login-screen";
 
@@ -67,14 +67,14 @@ function createUI() {
   loginDiv.append(emailInput, passInput, signupBtn, loginBtn);
   document.body.appendChild(loginDiv);
 
-  // --- App screen ---
+  // ===== APP SCREEN =====
   const appDiv = document.createElement("div");
   appDiv.id = "app";
   appDiv.style.display = "none";
 
+  // Welcome + Logout
   const userEmail = document.createElement("span");
   userEmail.id = "user-email";
-
   const logoutBtn = document.createElement("button");
   logoutBtn.id = "logout-btn";
   logoutBtn.textContent = "Logout";
@@ -94,6 +94,19 @@ function createUI() {
   searchInput.style.padding = "5px";
   searchDiv.appendChild(searchInput);
   appDiv.appendChild(searchDiv);
+
+  // Export / Import
+  const exportBtn = document.createElement("button");
+  exportBtn.id = "export-btn";
+  exportBtn.textContent = "Export Data";
+
+  const importInput = document.createElement("input");
+  importInput.id = "import-file";
+  importInput.type = "file";
+  importInput.accept = ".json";
+
+  appDiv.appendChild(exportBtn);
+  appDiv.appendChild(importInput);
 
   // Category sections
   categories.forEach((category) => {
@@ -120,7 +133,7 @@ function createUI() {
 
   document.body.appendChild(appDiv);
 
-  // --- BIND BUTTONS ---
+  // ===== BUTTON BINDINGS =====
   signupBtn.addEventListener("click", async () => {
     const email = emailInput.value.trim();
     const password = passInput.value;
@@ -171,6 +184,21 @@ function createUI() {
       });
     });
   });
+
+  // Export / Import bindings
+  exportBtn.addEventListener("click", async () => {
+    if (!auth.currentUser) return alert("Login required");
+    await exportData(auth.currentUser.uid);
+  });
+
+  importInput.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!auth.currentUser) return alert("Login required");
+
+    await importData(auth.currentUser.uid, file);
+    e.target.value = ""; // reset input
+  });
 }
 
 // ====== FIRESTORE FUNCTIONS ======
@@ -182,6 +210,68 @@ async function deleteItem(uid, category, id) {
 async function updateItem(uid, category, id, newName) {
   await updateDoc(doc(db, "users", uid, category, id), { name: newName });
 }
+
+// ====== EXPORT FUNCTION ======
+async function exportData(uid) {
+  const data = { exportedAt: new Date().toISOString() };
+
+  for (const cat of categories) {
+    const snap = await getDocs(collection(db, "users", uid, cat));
+    data[cat] = snap.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data(),
+    }));
+  }
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `backup_${uid}_${Date.now()}.json`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+// ====== IMPORT FUNCTION ======
+async function importData(uid, file) {
+  const text = await file.text();
+  const data = JSON.parse(text);
+  let skipped = [];
+
+  for (const cat of categories) {
+    if (!data[cat]) continue;
+
+    // Get current items for duplicate check
+    const snap = await getDocs(collection(db, "users", uid, cat));
+    const existing = snap.docs.map((docSnap) =>
+      docSnap.data().name.toLowerCase()
+    );
+
+    // Add only non-duplicates
+    for (const item of data[cat]) {
+      if (!item.name) continue;
+      if (existing.includes(item.name.toLowerCase())) {
+        skipped.push(`${cat}: ${item.name}`);
+        continue;
+      }
+      const id = item.id || Date.now().toString();
+      await setDoc(doc(db, "users", uid, cat, id), { name: item.name });
+    }
+  }
+
+  categories.forEach((cat) => listenToCategory(uid, cat));
+
+  if (skipped.length) {
+    alert("Skipped duplicates:\n" + skipped.join("\n"));
+  } else {
+    alert("Import completed with no duplicates.");
+  }
+}
+
 
 // Real-time listener for a category
 function listenToCategory(uid, category) {
@@ -269,6 +359,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
