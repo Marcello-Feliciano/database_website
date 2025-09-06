@@ -170,8 +170,7 @@ function createUI() {
 
     const addBtn = document.createElement("button");
     addBtn.id = `add-${category}`;
-    addBtn.innerHTML = "&#x2795;"; // hexadecimal for ➕
-
+    addBtn.textContent = "➕"; // the plus-in-circle character
 
     const list = document.createElement("ul");
     list.id = `${category}-list`;
@@ -331,6 +330,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
