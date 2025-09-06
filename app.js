@@ -264,7 +264,7 @@ async function importData(uid, file) {
     }
   }
 
-  categories.forEach((cat) => snap.listenToCategory(uid, cat));
+  categories.forEach((cat) => listenToCategory(user.uid, cat));
 
   if (skipped.length) {
     alert("Skipped duplicates:\n" + skipped.join("\n"));
@@ -360,6 +360,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
