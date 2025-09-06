@@ -269,9 +269,3 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
-
-
-this code works well but i notices there is still issue popping up:
-app.js:180 Uncaught (in promise) ReferenceError: loadCategory is not defined
-    at deleteItem (app.js:180:3) 
-
