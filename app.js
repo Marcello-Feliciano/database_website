@@ -12,7 +12,6 @@ import {
   collection,
   doc,
   setDoc,
-  getDocs,
   deleteDoc,
   updateDoc,
   onSnapshot,
@@ -299,3 +298,4 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
