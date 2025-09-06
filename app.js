@@ -174,33 +174,6 @@ function createUI() {
 }
 
 // ====== FIRESTORE FUNCTIONS ======
-async function loadCategory(uid, category) {
-  const list = $(`${category}-list`);
-  if (!list) return;
-  list.innerHTML = "";
-  try {
-    const snap = await getDocs(collection(db, "users", uid, category));
-    console.log(`Loaded ${snap.size} docs from ${category}`);
-    snap.forEach((docSnap) => {
-      console.log("Doc:", docSnap.id, docSnap.data());
-      const data = docSnap.data();
-      renderItem(list, category, docSnap.id, data.name, uid);
-    });
-  } catch (err) {
-    console.error(`Load error for ${category}:`, err);
-  }
-}
-
-async function addItem(uid, category, name) {
-  const id = Date.now().toString();
-  console.log("Adding:", { uid, category, id, name });
-  try {
-    await setDoc(doc(db, "users", uid, category, id), { name });
-    console.log("Added successfully");
-  } catch (err) {
-    console.error("Add error:", err);
-  }
-}
 
 async function deleteItem(uid, category, id) {
   await deleteDoc(doc(db, "users", uid, category, id));
@@ -298,4 +271,5 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
