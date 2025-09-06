@@ -170,7 +170,8 @@ function createUI() {
 
     const addBtn = document.createElement("button");
     addBtn.id = `add-${category}`;
-    addBtn.innerHTML = "&#10133;"; // Unicode decimal for ➕
+    addBtn.innerHTML = "&#x2795;"; // hexadecimal for ➕
+
 
     const list = document.createElement("ul");
     list.id = `${category}-list`;
@@ -330,6 +331,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
