@@ -84,6 +84,10 @@ function createUI() {
     li span {
       text-align: center; /* centers text inside its grid cell */
     }
+    .btn-container {
+      display: flex;
+      gap: 6px; /* space between buttons */
+    }
     #app {
       max-width: 500px;
       margin: 0 auto;
@@ -290,24 +294,25 @@ async function addItem(uid, category, name) {
 // ====== RENDER ITEMS ======
 function renderItem(list, category, id, name, uid) {
   const li = document.createElement("li");
-  const span = document.createElement("span");
-  span.textContent = name;
 
+  const textSpan = document.createElement("span");
+  textSpan.textContent = doc.data().name;
+  
+  const btnContainer = document.createElement("div");
+  btnContainer.className = "btn-container";
+  
   const editBtn = document.createElement("button");
- editBtn.innerHTML = "✏️"; // pencil icon
-  editBtn.onclick = () => {
-    const newName = prompt("Edit name:", name);
-    if (newName && newName.trim()) updateItem(uid, category, id, newName.trim());
-  };
-
+  editBtn.textContent = "✏️";
+  
   const delBtn = document.createElement("button");
-  delBtn.innerHTML = "🗑️"; // trash icon
-  delBtn.onclick = () => {
-    if (confirm("Delete this item?")) deleteItem(uid, category, id);
-  };
+  delBtn.textContent = "🗑️";
+  
+  btnContainer.appendChild(editBtn);
+  btnContainer.appendChild(delBtn);
+  
+  li.appendChild(textSpan);
+  li.appendChild(btnContainer);
 
-  li.append(span, editBtn, delBtn);
-  list.appendChild(li);
 }
 
 // ====== INITIALIZE ======
@@ -329,6 +334,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
