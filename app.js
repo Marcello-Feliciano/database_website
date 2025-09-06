@@ -177,12 +177,10 @@ function createUI() {
 
 async function deleteItem(uid, category, id) {
   await deleteDoc(doc(db, "users", uid, category, id));
-  loadCategory(uid, category);
 }
 
 async function updateItem(uid, category, id, newName) {
   await updateDoc(doc(db, "users", uid, category, id), { name: newName });
-  loadCategory(uid, category);
 }
 
 // Real-time listener for a category
@@ -271,5 +269,6 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
