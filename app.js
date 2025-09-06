@@ -1,4 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+import { getDocs } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -263,7 +264,7 @@ async function importData(uid, file) {
     }
   }
 
-  categories.forEach((cat) => listenToCategory(uid, cat));
+  categories.forEach((cat) => snap.docChanges(uid, cat));
 
   if (skipped.length) {
     alert("Skipped duplicates:\n" + skipped.join("\n"));
@@ -274,7 +275,7 @@ async function importData(uid, file) {
 
 
 // Real-time listener for a category
-function listenToCategory(uid, category) {
+function snap.docChanges(uid, category) {
   const list = $(`${category}-list`);
   if (!list) return;
   list.innerHTML = "";
@@ -353,12 +354,13 @@ onAuthStateChanged(auth, (user) => {
     loginScreen.style.display = "none";
     appScreen.style.display = "block";
     // Start real-time listeners
-    categories.forEach((cat) => listenToCategory(user.uid, cat));
+    categories.forEach((cat) => snap.docChanges(user.uid, cat));
   } else {
     loginScreen.style.display = "block";
     appScreen.style.display = "none";
   }
 });
+
 
 
 
