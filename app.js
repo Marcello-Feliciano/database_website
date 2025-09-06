@@ -170,7 +170,7 @@ function createUI() {
 
     const addBtn = document.createElement("button");
     addBtn.id = `add-${category}`;
-    addBtn.textContent = "Add";
+    addBtn.textContent = "➕";
 
     const list = document.createElement("ul");
     list.id = `${category}-list`;
@@ -330,4 +330,5 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
