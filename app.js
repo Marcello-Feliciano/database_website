@@ -16,6 +16,7 @@ import {
   updateDoc,
   onSnapshot,
   query,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
 // ====== CONFIG ======
@@ -273,27 +274,26 @@ function listenToCategory(uid, category) {
 
 // Add item with duplicate prevention
 async function addItem(uid, category, name) {
-  const normalized = name.trim().toLowerCase();
-  if (!normalized) return;
-
-  // Check for duplicates in real-time snapshot
-  const list = $(`${category}-list`);
-  const existing = Array.from(list.children).some((li) => {
-    const text = li.querySelector("span").textContent.toLowerCase();
-    return text === normalized;
-  });
-
-  if (existing) {
-    alert(`"${name}" already exists in ${category}.`);
-    return;
-  }
-
-  const id = Date.now().toString();
-  console.log("Adding:", { uid, category, id, name });
+  const trimmedName = name.trim();
+  if (!trimmedName) return;
 
   try {
-    await setDoc(doc(db, "users", uid, category, id), { name });
-    console.log("Added successfully");
+    const categoryRef = collection(db, "users", uid, category);
+
+    // 1️⃣ Check for duplicates in Firestore directly instead of DOM
+    const q = query(categoryRef);
+    const snap = await getDocs(q);
+    const duplicate = snap.docs.some(docSnap => docSnap.data().name.toLowerCase() === trimmedName.toLowerCase());
+
+    if (duplicate) {
+      alert(`"${trimmedName}" already exists in ${category}.`);
+      return;
+    }
+
+    // 2️⃣ Generate ID and add to Firestore
+    const id = Date.now().toString();
+    await setDoc(doc(categoryRef, id), { name: trimmedName });
+    console.log("Added successfully:", trimmedName);
   } catch (err) {
     console.error("Add error:", err);
   }
@@ -368,6 +368,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
