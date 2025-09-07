@@ -248,6 +248,7 @@ async function updateItem(uid, category, id, newName) {
 }
 
 // Real-time listener for a category
+// Real-time listener for a category with alphabetical sorting
 function listenToCategory(uid, category) {
   const list = $(`${category}-list`);
   if (!list) return;
@@ -258,16 +259,16 @@ function listenToCategory(uid, category) {
 
     // Convert snapshot to array of {id, name} objects
     const items = snap.docs.map(docSnap => ({
-    id: docSnap.id,
-    name: docSnap.data().name
-  }));
+      id: docSnap.id,
+      name: docSnap.data().name
+    }));
 
-  // Sort alphabetically by name
-  items.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+    // Sort alphabetically by name (case-insensitive)
+    items.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 
-  // Render sorted items
-  items.forEach(item => renderItem(list, category, item.id, item.name, uid));
-});
+    // Render sorted items
+    items.forEach(item => renderItem(list, category, item.id, item.name, uid));
+  });
 }
 
 // Add item with duplicate prevention
@@ -367,6 +368,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
