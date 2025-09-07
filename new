@@ -1,0 +1,37 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+import { getFirestore, collection, doc, updateDoc, deleteField, getDocs, query } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+// ====== CONFIG ======
+const firebaseConfig = {
+  apiKey: "AIzaSyBpFQYyFyMQWUHjNuIwMyb8UrT7l92ASao",
+  authDomain: "gmbcreviews.firebaseapp.com",
+  projectId: "gmbcreviews",
+  storageBucket: "gmbcreviews.appspot.com",
+  messagingSenderId: "156411101412",
+  appId: "1:156411101412:web:dfea6aa2c4b3518a042cf1",
+  measurementId: "G-DH9W04ZEWL",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Change this to your actual user ID
+const uid = "nbipCqzAsCXS3AxOWkTPkcwRyF22";  
+
+const categories = ["books", "movies", "games", "comics"];
+
+async function removeSubcategories() {
+  for (const category of categories) {
+    const q = query(collection(db, "users", uid, category));
+    const snap = await getDocs(q);
+    for (const docSnap of snap.docs) {
+      await updateDoc(doc(db, "users", uid, category, docSnap.id), {
+        subcategory: deleteField()
+      });
+      console.log(`Removed subcategory from ${category}/${docSnap.id}`);
+    }
+  }
+  console.log("All subcategories removed!");
+}
+
+removeSubcategories().catch(console.error);
