@@ -255,12 +255,20 @@ function listenToCategory(uid, category) {
 
   const q = query(collection(db, "users", uid, category));
   onSnapshot(q, (snap) => {
-    list.innerHTML = ""; // clear and rebuild
-    snap.forEach((docSnap) => {
-      const data = docSnap.data();
-      renderItem(list, category, docSnap.id, data.name, uid);
-    });
-  });
+  list.innerHTML = ""; // clear the list
+
+  // Convert snapshot to array of {id, name} objects
+  const items = snap.docs.map(docSnap => ({
+    id: docSnap.id,
+    name: docSnap.data().name
+  }));
+
+  // Sort alphabetically by name
+  items.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+
+  // Render sorted items
+  items.forEach(item => renderItem(list, category, item.id, item.name, uid));
+});
 }
 
 // Add item with duplicate prevention
@@ -360,4 +368,5 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
