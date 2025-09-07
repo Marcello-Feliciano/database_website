@@ -171,16 +171,6 @@ function createUI() {
     input.id = `${category}-input`;
     input.placeholder = `Add new ${category.slice(0, -1)}`;
 
-    // Subcategory dropdown (hardcoded for now)
-    const subSelect = document.createElement("select");
-    subSelect.id = `${category}-sub`;
-    ["", "Fantasy", "Sci-Fi", "Nonfiction"].forEach((opt) => {
-      const o = document.createElement("option");
-      o.value = opt.toLowerCase();
-      o.textContent = opt || "Select subcategory";
-      subSelect.appendChild(o);
-    });
-
     const addBtn = document.createElement("button");
     addBtn.id = `add-${category}`;
     addBtn.textContent = "➕"; // the plus-in-circle character
@@ -188,7 +178,7 @@ function createUI() {
     const list = document.createElement("ul");
     list.id = `${category}-list`;
 
-    section.append(title, input, subSelect, addBtn, list);
+    section.append(title, input, addBtn, list);
     appDiv.appendChild(section);
   });
 
@@ -226,13 +216,11 @@ function createUI() {
     const btn = $(`add-${category}`);
     btn.addEventListener("click", async () => {
       const input = $(`${category}-input`);
-      const subSelect = $(`${category}-sub`);
       if (!input.value.trim()) return;
       const user = auth.currentUser;
       if (!user) return alert("Not logged in.");
-      await addItem(user.uid, category, input.value.trim(), subSelect.value);
+      await addItem(user.uid, category, input.value.trim());
       input.value = "";
-      subSelect.value = ""; // reset dropdown
     });
   });
 
@@ -270,13 +258,13 @@ function listenToCategory(uid, category) {
     list.innerHTML = ""; // clear and rebuild
     snap.forEach((docSnap) => {
       const data = docSnap.data();
-      renderItem(list, category, docSnap.id, data.name, uid, data.subcategory || "");
+      renderItem(list, category, docSnap.id, data.name, uid);
     });
   });
 }
 
 // Add item with duplicate prevention
-async function addItem(uid, category, name, subcategory = "") {
+async function addItem(uid, category, name) {
   const normalized = name.trim().toLowerCase();
   if (!normalized) return;
 
@@ -293,10 +281,10 @@ async function addItem(uid, category, name, subcategory = "") {
   }
 
   const id = Date.now().toString();
-  console.log("Adding:", { uid, category, id, name, subcategory });
+  console.log("Adding:", { uid, category, id, name });
 
   try {
-    await setDoc(doc(db, "users", uid, category, id), { name, subcategory });
+    await setDoc(doc(db, "users", uid, category, id), { name });
     console.log("Added successfully");
   } catch (err) {
     console.error("Add error:", err);
@@ -304,14 +292,12 @@ async function addItem(uid, category, name, subcategory = "") {
 }
 
 // ====== RENDER ITEMS ======
-function renderItem(list, category, id, name, uid, subcategory = "") {
+function renderItem(list, category, id, name, uid) {
   const li = document.createElement("li");
 
   // --- Text span ---
   const textSpan = document.createElement("span");
-  textSpan.textContent = subcategory 
-    ? `${name} (${subcategory})`
-    : name;
+  textSpan.textContent = name;
 
   // --- Buttons container ---
   const btnContainer = document.createElement("div");
@@ -374,5 +360,3 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
-
-
