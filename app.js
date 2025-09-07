@@ -292,7 +292,7 @@ async function addItem(uid, category, name) {
   console.log("Adding:", { uid, category, id, name });
 
   try {
-    await(doc(db, "users", uid, category, id), { name });
+    await setDoc(doc(db, "users", uid, category, id), { name });
     console.log("Added successfully");
   } catch (err) {
     console.error("Add error:", err);
@@ -368,6 +368,7 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
 
