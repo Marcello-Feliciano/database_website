@@ -251,14 +251,13 @@ async function updateItem(uid, category, id, newName) {
 function listenToCategory(uid, category) {
   const list = $(`${category}-list`);
   if (!list) return;
-  list.innerHTML = "";
 
   const q = query(collection(db, "users", uid, category));
   onSnapshot(q, (snap) => {
-  list.innerHTML = ""; // clear the list
+    list.innerHTML = ""; // clear the list
 
-  // Convert snapshot to array of {id, name} objects
-  const items = snap.docs.map(docSnap => ({
+    // Convert snapshot to array of {id, name} objects
+    const items = snap.docs.map(docSnap => ({
     id: docSnap.id,
     name: docSnap.data().name
   }));
@@ -368,5 +367,6 @@ onAuthStateChanged(auth, (user) => {
     appScreen.style.display = "none";
   }
 });
+
 
 
